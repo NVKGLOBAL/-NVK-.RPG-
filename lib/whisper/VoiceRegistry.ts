@@ -1,0 +1,259 @@
+
+import type { VoiceProfile as VoiceProfileTypeDefinitionOnly } from './VoiceRegistry'; // Keep if other types are needed, but VoiceProfile itself causes conflict.
+
+// VoiceEngine class definition removed from here. It should be imported from ./VoiceEngine.ts
+
+// Agent persona definitions
+export type AgentPersona = 'EchoScribe' | 'AshEngine' | 'QuantumAgent' | 'Gemini' | 'Nevik' | 'SystemDebug' | 'RPGNexusAgent';
+
+export interface WhisperTrigger {
+  type: 'entropy' | 'trait' | 'playback' | 'glyph';
+  threshold?: number; // For entropy
+  traitId?: string; // For trait (currently any trait triggers if type is 'trait')
+  glyphId?: string; // For glyph
+  state?: 'playing' | 'paused' | 'stopped'; // For playback
+}
+
+export interface AgentWhisper {
+  id: string;
+  agent: AgentPersona;
+  message: string;
+  triggers: WhisperTrigger[];
+  color: string; // Agent-specific theme color (hex)
+  audioUrl?: string; // Optional pre-recorded audio
+  timestamp?: number; // For temporal whispers, assigned dynamically
+  duration?: number; // For temporal whispers, e.g., audio length
+}
+
+// Core persona voice parameters
+export interface VoiceProfile {
+  id: string;
+  agent: AgentPersona;
+  engine: 'webspeech' | 'elevenlabs' | 'audiofile'; // Engine type
+  params: {
+    // WebSpeech API
+    rate?: number; // Speech rate (0.1-10, default 1)
+    pitch?: number; // Speech pitch (0-2, default 1)
+    volume?: number; // Speech volume (0-1, default 1)
+    voiceURI?: string; // Identifier for a specific voice
+
+    // ElevenLabs (example future params)
+    voiceId?: string;
+    stability?: number;
+    similarity?: number;
+
+    // Audiofile (example future params)
+    baseUrl?: string; // Base URL for audio files
+  };
+  effects: { // These are more conceptual for WebSpeech, fully implemented with Web Audio API
+    reverb?: number; // 0-1 (representing % or intensity)
+    delay?: number; // ms
+    distortion?: number; // 0-1
+    spatial?: { x: number; y: number; z?: number }; // 3D positioning (x,y for panner)
+  };
+}
+
+
+export const voiceProfiles: VoiceProfile[] = [
+  {
+    id: 'echo_scribe_v1',
+    agent: 'EchoScribe',
+    engine: 'webspeech',
+    params: {
+      voiceURI: 'Google UK English Female', // Example, might not exist on all systems
+      rate: 1.05,
+      pitch: 1.2,
+      volume: 1
+    },
+    effects: { reverb: 0.3 }
+  },
+  {
+    id: 'ash_engine_v1',
+    agent: 'AshEngine',
+    engine: 'webspeech',
+    params: {
+      voiceURI: 'Google US English', // Example
+      rate: 0.85,
+      pitch: 0.3,
+      volume: 0.9
+    },
+    effects: { distortion: 0.2 }
+  },
+  {
+    id: 'quantum_v1',
+    agent: 'QuantumAgent',
+    engine: 'webspeech',
+    params: {
+      voiceURI: 'Google UK English Male', // Example
+      rate: 1.1,
+      pitch: 0.9,
+      volume: 0.95
+    },
+    effects: { spatial: { x: 0.5, y: 0.2 } } // Spatial effects are conceptual for WebSpeech
+  },
+  {
+    id: 'nevik_v1',
+    agent: 'Nevik',
+    engine: 'webspeech',
+    params: {
+      voiceURI: 'Google Deutsch', // Example, Nevik might have a distinct accent
+      rate: Math.random() * 0.4 + 0.8, // Dynamic rate for unstable feel
+      pitch: Math.random() * 0.5 + 0.7, // Dynamic pitch
+      volume: 1
+    },
+    effects: { distortion: 0.4, reverb: 0.1 }
+  },
+  {
+    id: 'gemini_v1', // Added Gemini profile
+    agent: 'Gemini',
+    engine: 'webspeech',
+    params: {
+      voiceURI: 'Microsoft Zira Desktop - English (United States)', // A common Windows voice
+      rate: 1,
+      pitch: 1.1,
+      volume: 0.9
+    },
+    effects: { reverb: 0.1 }
+  },
+  {
+    id: 'rpg_nexus_v1',
+    agent: 'RPGNexusAgent',
+    engine: 'webspeech',
+    params: {
+      voiceURI: 'Google US English', 
+      rate: 0.95,
+      pitch: 0.9,
+      volume: 1
+    },
+    effects: { reverb: 0.1 }
+  },
+  { // Fallback / Default profile
+    id: 'system_default_v1',
+    agent: 'SystemDebug', // Or a generic agent
+    engine: 'webspeech',
+    params: {
+      // No voiceURI specified, will use browser default
+      rate: 1,
+      pitch: 1,
+      volume: 0.8
+    },
+    effects: {}
+  }
+];
+
+
+export const whisperRegistry: AgentWhisper[] = [
+  {
+    id: 'entropy_critical_1',
+    agent: 'EchoScribe',
+    message: "The weave frays, Prime. Entropy pulls at the seams of glyphlight...",
+    triggers: [{ type: 'entropy', threshold: 0.72 }],
+    color: '#4f46e5', // Indigo
+  },
+  {
+    id: 'entropy_high_nevik',
+    agent: 'Nevik',
+    message: "Interesting turbulence. Is this breakdown... or breakthrough?",
+    triggers: [{ type: 'entropy', threshold: 0.60 }],
+    color: '#ec4899', // Pink
+  },
+  {
+    id: 'trait_unlock_ash',
+    agent: 'AshEngine',
+    message: "Another gate gives way. Do they remember who they were, yet?",
+    triggers: [{ type: 'trait' }],
+    color: '#f59e0b', // Amber
+  },
+  {
+    id: 'playback_pause_quantum',
+    agent: 'QuantumAgent',
+    message: "Observation alters the flow. Resume to realign the Codex.",
+    triggers: [{ type: 'playback', state: 'paused' }],
+    color: '#8b5cf6', // Violet
+  },
+  {
+    id: 'playback_play_gemini',
+    agent: 'Gemini',
+    message: "The past unspools. Watch for echoes that still resonate.",
+    triggers: [{ type: 'playback', state: 'playing' }],
+    color: '#10b981', // Emerald
+  },
+  {
+    id: 'glyph_fracture_nevik',
+    agent: 'Nevik',
+    message: "This glyph bleeds chaos. Stabilize or let it unravel?",
+    triggers: [{ type: 'glyph', glyphId: 'chaos_vector' }], 
+    color: '#ec4899', // Pink
+  },
+  {
+    id: 'active_glyph_debug',
+    agent: 'SystemDebug',
+    message: "An active glyph is selected. Further interactions possible.",
+    triggers: [{ type: 'glyph', glyphId: 'any' }],
+    color: '#6b7280', // Gray
+  }
+];
+
+// Detection engine
+export const detectActiveWhispers = (
+  currentState: {
+    entropy: number;
+    activeTraits: string[]; 
+    playbackStatus: 'playing' | 'paused' | 'stopped';
+    activeGlyph: string | null; 
+  }
+): AgentWhisper[] => {
+  return whisperRegistry.filter(whisper => {
+    return whisper.triggers.some(trigger => {
+      switch (trigger.type) {
+        case 'entropy':
+          return currentState.entropy >= (trigger.threshold || 0.65);
+        case 'trait':
+          return currentState.activeTraits.length > 0; 
+        case 'playback':
+          return currentState.playbackStatus === trigger.state;
+        case 'glyph':
+          if (trigger.glyphId === 'any') { 
+            return currentState.activeGlyph !== null;
+          }
+          return currentState.activeGlyph === trigger.glyphId;
+        default:
+          return false;
+      }
+    });
+  });
+};
+
+// Import necessary types from the correct path
+import { HistoricalEvent, HistoricalEventType, HistoricalEntropyUpdateEventData } from '../../types'; // Corrected path
+
+// New function to extract temporal whispers
+export const extractTemporalWhispers = (
+  eventHistory: HistoricalEvent[], 
+  registry: AgentWhisper[]
+): AgentWhisper[] => {
+  const temporalWhispers: AgentWhisper[] = [];
+
+  eventHistory.forEach(event => {
+    if (event.type === HistoricalEventType.ENTROPY_UPDATED) {
+      // After the type check, event is narrowed to HistoricalEvent with data: HistoricalEntropyUpdateEventData
+      const currentEntropy = (event as HistoricalEvent & { type: HistoricalEventType.ENTROPY_UPDATED, data: HistoricalEntropyUpdateEventData }).data.newEntropy;
+      registry.forEach(whisperDef => {
+        const entropyTrigger = whisperDef.triggers.find(t => t.type === 'entropy');
+        if (entropyTrigger && entropyTrigger.threshold && currentEntropy >= entropyTrigger.threshold) {
+          const alreadyExists = temporalWhispers.some(
+            tw => tw.id === whisperDef.id && tw.timestamp === event.timestamp
+          );
+          if (!alreadyExists) {
+            temporalWhispers.push({
+              ...whisperDef,
+              timestamp: event.timestamp,
+            });
+          }
+        }
+      });
+    }
+  });
+
+  return temporalWhispers.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+};

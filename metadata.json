@@ -1,0 +1,9 @@
+{
+  "name": "Remix: 🜂 NVKΔ.RPG 🜂",
+  "description": "A high-fidelity retro-futuristic RPG sandbox integrating alchemical magic, trans-human cybernetics, Gemini AI oracle engines, and MetaMask Web3 somatic bindings.",
+  "requestFramePermissions": [],
+  "prompt": "",
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
