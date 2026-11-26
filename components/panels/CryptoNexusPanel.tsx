@@ -32,11 +32,10 @@ export const CryptoNexusPanel: React.FC<CryptoNexusPanelProps> = ({
   const [mintedTx, setMintedTx] = useState<string | null>(null);
   
   // Local simulated balance to show on connected account
-  const [balanceEth, setBalanceEth] = useState<string>('0.000');
+  const [balanceEth, setBalanceEth] = useState<string>('RPC Unavailable');
 
   useEffect(() => {
     if (isConnected && walletAddress && typeof window !== 'undefined' && window.ethereum) {
-      // Try to fetch real balance if allowed by network
       const getBalance = async () => {
         try {
           const rawBalance = await window.ethereum.request({
@@ -46,17 +45,15 @@ export const CryptoNexusPanel: React.FC<CryptoNexusPanelProps> = ({
           if (rawBalance) {
             const wei = parseInt(rawBalance, 16);
             const eth = (wei / 10 ** 18).toFixed(4);
-            setBalanceEth(eth);
+            setBalanceEth(`${eth} ETH`);
           }
-        } catch (e) {
-          // Fallback to beautiful simulated quantum ether balance if blocked
-          const pseudoBalance = (Math.random() * 4.5 + 0.1).toFixed(3);
-          setBalanceEth(pseudoBalance);
+        } catch {
+          setBalanceEth('RPC Unavailable');
         }
       };
       getBalance();
     } else {
-      setBalanceEth('0.000');
+      setBalanceEth('Wallet Disconnected');
     }
   }, [isConnected, walletAddress]);
 
@@ -174,7 +171,7 @@ export const CryptoNexusPanel: React.FC<CryptoNexusPanelProps> = ({
 
             <div className="flex justify-between items-center text-xs font-mono">
               <span className="text-slate-400">Vessel Balance:</span>
-              <span className="text-emerald-400 font-bold">{balanceEth} ETH</span>
+              <span className={`font-bold ${balanceEth.endsWith('ETH') ? 'text-emerald-400' : 'text-amber-400'}`}>{balanceEth}</span>
             </div>
             
             {isConnected ? (
@@ -262,16 +259,16 @@ export const CryptoNexusPanel: React.FC<CryptoNexusPanelProps> = ({
             )}
           </div>
 
-          {/* Section 2: Mint Seeker Profile ID as certified NFT */}
+          {/* Section 2: Sign Off-Chain Soul Seal Attestation */}
           {activeProfile && (
             <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 flex flex-col gap-4">
               <div className="flex justify-between items-center">
                 <h3 className="text-sm font-bold uppercase tracking-wider text-pink-300 font-mono flex items-center gap-2">
                   <i className="ri-bubble-chart-line"></i>
-                  Astral Soul Minting Engine
+                  Off-Chain Soul Seal Attestation
                 </h3>
-                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/40 border border-emerald-900/60 px-2 py-0.5 rounded">
-                  COST: FREE (TESTNET)
+                <span className="text-[10px] font-mono text-cyan-300 bg-cyan-950/40 border border-cyan-800/60 px-2 py-0.5 rounded">
+                  EIP-191 personal_sign (No Gas)
                 </span>
               </div>
 
@@ -290,12 +287,12 @@ export const CryptoNexusPanel: React.FC<CryptoNexusPanelProps> = ({
                 disabled={!isConnected}
                 className="w-full bg-gradient-to-r from-pink-600 to-indigo-600 hover:from-pink-500 hover:to-indigo-500 border border-pink-500/50 text-white font-mono text-xs py-2.5 rounded-lg font-bold shadow-lg"
               >
-                MINT SOUL SEAL AS BLOCKCHAIN NFT
+                SIGN OFF-CHAIN SOUL SEAL ATTESTATION
               </Button>
 
               {mintStatus && (
                 <div className="text-xs font-mono text-slate-400 flex items-center justify-between border-t border-slate-800/80 pt-2.5">
-                  <span>Mint Genesis Status:</span>
+                  <span>Attestation Status:</span>
                   <span className={`font-bold ${
                     mintStatus === 'SUCCESS' ? 'text-emerald-400 font-boldPulse' : 'text-amber-400'
                   }`}>{mintStatus}</span>
@@ -304,7 +301,7 @@ export const CryptoNexusPanel: React.FC<CryptoNexusPanelProps> = ({
 
               {mintedTx && (
                 <div className="p-3 rounded bg-slate-950/80 border border-slate-800 font-mono mt-1 text-[10px]">
-                  <p className="text-slate-400 mb-1">Contract Transaction Proof Logged:</p>
+                  <p className="text-slate-400 mb-1">Signed Off-Chain Proof Hash:</p>
                   <span className="text-pink-300 select-all break-all">{mintedTx}</span>
                 </div>
               )}

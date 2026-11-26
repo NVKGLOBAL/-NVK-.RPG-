@@ -57,7 +57,7 @@ export const useTemporalWhispers = (
         // utterance.lang = 'en-US'; // Optional: set a default language
         window.speechSynthesis.speak(utterance);
       } else {
-        alert(`Audio Playback Error for: ${whisper.agent}\n${whisper.message.substring(0,100)}...`);
+        console.warn(`Audio playback unavailable in this environment for ${whisper.agent}: ${whisper.message.substring(0, 100)}`);
       }
     }
   }, []); // voiceEngine is stable, no need to include in deps

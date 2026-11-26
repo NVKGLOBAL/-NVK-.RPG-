@@ -19,6 +19,7 @@ import {
   HAIR_STYLES
 } from '../../constants';
 import { globalSoundEngine } from '../../lib/SoundEngine';
+import { useNotifications } from '../../context/NotificationContext';
 
 // --- Random Name Generator ---
 const NAME_PREFIXES = ["Xyl", "Chron", "Vor", "Zyn", "Kael", "Thal", "Om", "Lyra", "Vex", "Ser", "Dra", "Myr", "Pyr", "Cyp", "Nek", "Sol", "Zen", "Rin", "Kys", "Tor", "Ael", "Fen", "Grim"];
@@ -153,6 +154,7 @@ export const OnboardingFunnel: React.FC<OnboardingFunnelProps> = ({ onComplete, 
   
   const [generatedProfile, setGeneratedProfile] = useState<SeekerProfile | null>(null);
   const { invokeGemini, generateImage } = useGemini();
+  const { notify } = useNotifications();
 
   const activeWeapon = useMemo(() => STARTER_WEAPONS.find(w => w.id === weaponId) || STARTER_WEAPONS[0], [weaponId]);
   const activeOutfit = useMemo(() => STARTER_OUTFITS.find(o => o.id === outfitId) || STARTER_OUTFITS[0], [outfitId]);
@@ -300,9 +302,7 @@ export const OnboardingFunnel: React.FC<OnboardingFunnelProps> = ({ onComplete, 
   }) => {
     const finalName = (overrides?.name !== undefined ? overrides.name : name).trim();
     if (!finalName) { 
-      // Replace alert with a more subtle feedback if possible, but keeping it for now for simplicity
-      // since I don't have a toast system here easily.
-      alert("A Seeker must have a name."); 
+      notify("A Seeker must have a designation name before weaving.", "warning");
       return; 
     }
     

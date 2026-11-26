@@ -8,6 +8,7 @@ import { useNarration } from '../../context/NarrationContext';
 import { globalSoundEngine } from '../../lib/SoundEngine';
 import { motion, AnimatePresence } from 'framer-motion';
 import RPGMementoArchivePanel from './RPGMementoArchivePanel';
+import { useNotifications } from '../../context/NotificationContext';
 
 // --- Constants ---
 const DEFAULT_ACTIONS: RPGDynamicAction[] = [
@@ -314,8 +315,16 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
     } finally { setIsProcessingTurn(false); }
   };
 
-  const handleEndQuest = () => {
-    if (confirm("Conclude current campaign? History will be archived, but gameplay state will reset.")) {
+  const { confirmDialog } = useNotifications();
+
+  const handleEndQuest = async () => {
+    const ok = await confirmDialog({
+      title: 'Conclude Campaign',
+      message: 'Conclude the current campaign? History will remain archived, but active nexus state will reset.',
+      confirmLabel: 'Conclude Campaign',
+      destructive: true,
+    });
+    if (ok) {
         setGameState(prev => ({ 
             ...prev, 
             currentLocation: '', 

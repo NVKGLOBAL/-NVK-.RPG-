@@ -149,7 +149,7 @@ const AssistantDashboardPanel: React.FC<AssistantDashboardPanelProps> = ({ addEc
 
     try {
       const prompt = `You are a highly advanced AI assistant. Provide a concise, insightful 3-sentence summary researching the following topic: "${topic}"`;
-      const response = await invokeGemini(prompt, undefined, "text/plain", 'gemini-3-flash-preview');
+      const response = await invokeGemini(prompt, undefined, "text/plain");
       
       setResearch(prev => prev.map(r => 
         r.id === newRes.id ? { ...r, status: 'complete', summary: response || "Research complete." } : r

@@ -1,0 +1,92 @@
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes temporalFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 200% 50%;
+  }
+}
+
+@keyframes spiralDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes bloomCorePulse {
+  0%, 100% {
+    box-shadow: 0 0 12px rgba(129, 140, 248, 0.25);
+  }
+  50% {
+    box-shadow: 0 0 24px rgba(45, 212, 191, 0.55);
+  }
+}
+
+@keyframes axiomCardPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(45, 212, 191, 0.18);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(45, 212, 191, 0.45);
+  }
+}
+
+@keyframes reverseSpin {
+  from {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.animate-axiomCardPulse {
+  animation: axiomCardPulse 3s ease-in-out infinite;
+}
+
+.animate-bloom-core-pulse {
+  animation: bloomCorePulse 2.5s ease-in-out infinite;
+}
+
+.animate-reverse-spin {
+  animation: reverseSpin 12s linear infinite;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.15);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(79, 70, 229, 0.35);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar {
+  height: 4px;
+  width: 4px;
+}
+
+.custom-scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.35);
+  border-radius: 9999px;
+}

@@ -48,7 +48,6 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
     setTestResult(null);
   };
 
-  const activeModelObj = availableModels.find(m => m.id === selectedModelId);
   const isCustom = selectedModelId === 'custom';
 
   return (
@@ -64,8 +63,8 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
               <i className="ri-cpu-line text-xl"></i>
             </div>
             <div>
-              <h2 className="text-lg font-bold font-cinzel text-indigo-300">AI Model & Provider Configuration</h2>
-              <p className="text-xs text-slate-400">Easily swap AI models, fine-tuned checkpoints, and API keys for GitHub deployment.</p>
+              <h2 className="text-lg font-bold font-cinzel text-indigo-300">AI Engine & Model Architecture</h2>
+              <p className="text-xs text-slate-400">Preconfigured open-source AI, zero API keys needed. Ready for GitHub deployment.</p>
             </div>
           </div>
           <button 
@@ -81,19 +80,44 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
         <div className="p-6 overflow-y-auto space-y-6 flex-1">
 
           {/* Key Status Banner */}
-          <div className={`p-4 rounded-xl border flex items-center justify-between ${hasActiveKey ? 'bg-emerald-950/30 border-emerald-500/40 text-emerald-300' : 'bg-amber-950/30 border-amber-500/40 text-amber-300'}`}>
-            <div className="flex items-center gap-3">
-              <i className={`ri-${hasActiveKey ? 'shield-check-line text-2xl text-emerald-400' : 'alert-line text-2xl text-amber-400'}`}></i>
+          <div className="p-4 rounded-xl border bg-emerald-950/30 border-emerald-500/40 text-emerald-300 flex items-start justify-between">
+            <div className="flex items-start gap-3">
+              <i className="ri-shield-check-line text-2xl text-emerald-400 shrink-0 mt-0.5"></i>
               <div>
-                <h4 className="text-sm font-bold">{hasActiveKey ? 'API Key Active' : 'Fallback Simulation Mode'}</h4>
-                <p className="text-xs text-slate-300">
-                  {customApiKey ? 'Using Custom User API Key (Saved in browser storage).' : (hasActiveKey ? 'Using Environment Variable API Key (.env).' : 'No API key detected. Add GEMINI_API_KEY to .env or paste below.')}
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-bold">Zero-Key Mode: ACTIVE & READY</h4>
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">
+                    No Gemini Key Required
+                  </span>
+                </div>
+                <p className="text-xs text-slate-300 mt-1">
+                  Text Generation, FLUX Image Synthesis, Web Speech Narration, and Vector Memories operate out-of-the-box with zero API keys or billing setup.
                 </p>
+                
+                {/* Feature Matrix */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 pt-3 border-t border-emerald-500/20">
+                  <div className="bg-slate-950/60 p-2 rounded border border-emerald-500/20 text-center">
+                    <span className="text-[10px] text-slate-400 block font-mono">LLM REASONING</span>
+                    <span className="text-xs font-bold text-emerald-400">Open Pollinations</span>
+                  </div>
+                  <div className="bg-slate-950/60 p-2 rounded border border-emerald-500/20 text-center">
+                    <span className="text-[10px] text-slate-400 block font-mono">IMAGE SYNTHESIS</span>
+                    <span className="text-xs font-bold text-emerald-400">FLUX / Diffusion</span>
+                  </div>
+                  <div className="bg-slate-950/60 p-2 rounded border border-emerald-500/20 text-center">
+                    <span className="text-[10px] text-slate-400 block font-mono">SPEECH / TTS</span>
+                    <span className="text-xs font-bold text-emerald-400">Web Speech API</span>
+                  </div>
+                  <div className="bg-slate-950/60 p-2 rounded border border-emerald-500/20 text-center">
+                    <span className="text-[10px] text-slate-400 block font-mono">VECTOR MEMORY</span>
+                    <span className="text-xs font-bold text-emerald-400">Local Cosine 128d</span>
+                  </div>
+                </div>
               </div>
             </div>
             {effectiveApiKey && (
-              <span className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-slate-950/80 border border-slate-700 text-slate-400">
-                Key: ••••{effectiveApiKey.slice(-4)}
+              <span className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-slate-950/80 border border-slate-700 text-slate-400 shrink-0">
+                Custom Key: ••••{effectiveApiKey.slice(-4)}
               </span>
             )}
           </div>
@@ -101,7 +125,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
           {/* Model Selection */}
           <div>
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-              Select AI Model Architecture
+              Select Active Intelligence Architecture
             </label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {availableModels.map((model) => {
@@ -112,7 +136,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                     onClick={() => { setSelectedModelId(model.id); setTestResult(null); }}
                     className={`text-left p-3.5 rounded-xl border transition flex flex-col justify-between ${
                       isSelected 
-                        ? 'bg-indigo-950/60 border-indigo-500 text-white shadow-lg shadow-indigo-500/10' 
+                        ? 'bg-indigo-950/60 border-indigo-500 text-white shadow-lg shadow-indigo-500/10 ring-1 ring-indigo-400/50' 
                         : 'bg-slate-800/40 border-slate-700/60 text-slate-300 hover:bg-slate-800 hover:border-slate-600'
                     }`}
                   >
@@ -120,9 +144,12 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                       <span className={`text-sm font-bold ${isSelected ? 'text-indigo-300' : 'text-slate-200'}`}>
                         {model.name}
                       </span>
-                      {isSelected && <i className="ri-checkbox-circle-fill text-indigo-400"></i>}
+                      {isSelected && <i className="ri-checkbox-circle-fill text-indigo-400 text-base"></i>}
                     </div>
                     <p className="text-xs text-slate-400 line-clamp-2">{model.description}</p>
+                    <span className="text-[9px] font-mono text-indigo-400/70 mt-2 uppercase tracking-wide">
+                      {model.category}
+                    </span>
                   </button>
                 );
               })}
@@ -139,27 +166,27 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                 type="text"
                 value={customModelInput}
                 onChange={(e) => setCustomModelInput(e.target.value)}
-                placeholder="e.g., tunedModels/my-special-model or gemini-3.1-pro-preview"
+                placeholder="e.g., pollinations-deepseek or gemini-3.5-flash"
                 className="w-full px-3.5 py-2 text-sm bg-slate-900 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
               />
               <p className="text-[11px] text-slate-400">
-                You can specify fine-tuned Gemini model identifiers (`tunedModels/...`), custom endpoint handles, or experimental release tags.
+                Specify any custom provider endpoint or model handle.
               </p>
             </div>
           )}
 
-          {/* Custom API Key Input Drawer */}
+          {/* Optional Custom API Key Override */}
           <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="text-sm font-bold text-slate-200">Custom API Key Override</h4>
-                <p className="text-xs text-slate-400">Useful when running from a cloned GitHub repository locally without modifying code.</p>
+                <h4 className="text-sm font-bold text-slate-200">Optional: Custom API Key Override</h4>
+                <p className="text-xs text-slate-400">Only needed if you specifically want to link an external private Gemini or OpenAI quota.</p>
               </div>
               <button
                 onClick={() => setShowKeyInput(!showKeyInput)}
                 className="text-xs text-indigo-400 hover:text-indigo-300 underline font-medium"
               >
-                {showKeyInput ? 'Hide Key Input' : (customApiKey ? 'Edit Custom Key' : 'Enter Key Manually')}
+                {showKeyInput ? 'Hide Key Input' : (customApiKey ? 'Edit Custom Key' : 'Add Custom Key (Optional)')}
               </button>
             </div>
 
@@ -170,7 +197,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                     type="password"
                     value={tempApiKey}
                     onChange={(e) => setTempApiKey(e.target.value)}
-                    placeholder="AIzaSy..."
+                    placeholder="AIzaSy... (Optional)"
                     className="flex-1 px-3 py-2 text-sm bg-slate-900 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
                   />
                   <Button onClick={handleSaveApiKey} className="bg-indigo-600 hover:bg-indigo-500 text-xs px-4">
@@ -183,7 +210,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                   )}
                 </div>
                 <p className="text-[11px] text-slate-500">
-                  Keys are kept exclusively in browser `localStorage`. They are never uploaded or committed to git.
+                  Custom keys are kept securely in browser localStorage only.
                 </p>
               </div>
             )}
@@ -194,7 +221,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
             <div className={`p-3.5 rounded-xl border text-xs flex items-start gap-2.5 ${testResult.success ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-200' : 'bg-rose-950/40 border-rose-500/50 text-rose-200'}`}>
               <i className={`ri-${testResult.success ? 'checkbox-circle-line text-lg text-emerald-400' : 'error-warning-line text-lg text-rose-400'} shrink-0`}></i>
               <div>
-                <span className="font-bold">{testResult.success ? 'Connection Success:' : 'Diagnostic Notice:'}</span> {testResult.message}
+                <span className="font-bold">{testResult.success ? 'Connection Status:' : 'Diagnostic Notice:'}</span> {testResult.message}
               </div>
             </div>
           )}
@@ -211,7 +238,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
             {isTesting ? (
               <>
                 <i className="ri-loader-4-line animate-spin text-indigo-400"></i>
-                <span>Pinging Model...</span>
+                <span>Verifying Zero-Key Link...</span>
               </>
             ) : (
               <>

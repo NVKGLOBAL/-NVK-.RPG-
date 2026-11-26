@@ -4,6 +4,7 @@ import type { AgentWhisper } from '../../lib/whisper/WhisperRegistry'; // Correc
 import { AudioPlayer } from './AudioPlayer'; 
 import type { VoiceProfile } from '../../lib/whisper/WhisperRegistry'; // Corrected path
 import type { VoiceEngine } from '../../lib/whisper/VoiceEngine'; // Corrected path
+import { useNotifications } from '../../context/NotificationContext';
 
 interface WhisperOverlayProps {
   activeWhispers: AgentWhisper[];
@@ -18,6 +19,7 @@ export const WhisperOverlay: React.FC<WhisperOverlayProps> = ({
   voiceEngine, 
   voiceProfiles, 
 }) => {
+  const { notify } = useNotifications();
   return (
     <div className="fixed bottom-20 right-6 z-[1500] space-y-3 w-80 sm:w-96" aria-live="polite">
       <AnimatePresence>
@@ -74,7 +76,7 @@ export const WhisperOverlay: React.FC<WhisperOverlayProps> = ({
                       const utterance = new SpeechSynthesisUtterance(whisper.message); 
                       window.speechSynthesis.speak(utterance);
                     } else if (typeof window === 'undefined' || !window.speechSynthesis) {
-                      alert('Text-to-speech not supported by your browser.');
+                      notify('Text-to-speech is not supported by your browser.', 'warning');
                     }
                   }
                 } else {
@@ -83,7 +85,7 @@ export const WhisperOverlay: React.FC<WhisperOverlayProps> = ({
                     const utterance = new SpeechSynthesisUtterance(whisper.message);
                     window.speechSynthesis.speak(utterance);
                   } else {
-                    alert('Text-to-speech not supported by your browser.');
+                    notify('Text-to-speech is not supported by your browser.', 'warning');
                   }
                 }
               }}

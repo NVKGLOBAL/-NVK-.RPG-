@@ -6,6 +6,7 @@ import type { RitualElementItem, PlacedGlyph, CanvasConnection, XYPosition, Ritu
 import { RitualGlyphType, AgentName } from '../types';
 import { RITUAL_ELEMENTS, AXIOM_RITUAL_ELEMENTS, AXIOM_DATA, AGENT_PROFILES } from '../constants';
 import RitualGrimoireModal from './modals/RitualGrimoireModal';
+import { useNotifications } from '../context/NotificationContext';
 
 interface RitualCanvasContainerProps {
   addEchoMessage: (source: string, text: string, colorClass?: string) => void;
@@ -70,6 +71,7 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
   const [tempLineEnd, setTempLineEnd] = useState<XYPosition | null>(null);
   const [isGrimoireOpen, setIsGrimoireOpen] = useState(false);
   const [savedRituals, setSavedRituals] = useState<SavedRitual[]>([]);
+  const { promptDialog, confirmDialog, notify } = useNotifications();
   
   const svgRef = useRef<SVGSVGElement>(null);
 
@@ -85,17 +87,24 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
     }
   }, []);
 
-  const saveRitualToGrimoire = () => {
+  const saveRitualToGrimoire = async () => {
     if (placedGlyphs.length === 0) {
       addEchoMessage('RitualLoom', 'Cannot save an empty pattern.', 'text-yellow-400');
+      notify('Place at least one glyph before saving to the Grimoire.', 'warning');
       return;
     }
-    const name = prompt("Name this Ritual Pattern:");
-    if (!name) return;
+    const name = await promptDialog({
+      title: 'Inscribe Ritual Pattern',
+      message: 'Enter a canonical name for this glyph pattern:',
+      placeholder: 'e.g. Harmonic Anchor Lattice',
+      confirmLabel: 'Inscribe Pattern',
+    });
+    if (!name || !name.trim()) return;
 
+    const cleanName = name.trim();
     const newRitual: SavedRitual = {
       id: `ritual-${Date.now()}`,
-      name,
+      name: cleanName,
       timestamp: Date.now(),
       placedGlyphs,
       connections
@@ -104,7 +113,8 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
     const updatedRituals = [newRitual, ...savedRituals];
     setSavedRituals(updatedRituals);
     localStorage.setItem('codex_saved_rituals', JSON.stringify(updatedRituals));
-    addEchoMessage('RitualLoom', `Pattern "${name}" inscribed in Grimoire.`, 'text-amber-300');
+    addEchoMessage('RitualLoom', `Pattern "${cleanName}" inscribed in Grimoire.`, 'text-amber-300');
+    notify(`Pattern "${cleanName}" inscribed in Grimoire.`, 'success');
   };
 
   const loadRitualFromGrimoire = (ritual: SavedRitual) => {
@@ -114,8 +124,14 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
     setIsGrimoireOpen(false);
   };
 
-  const deleteRitualFromGrimoire = (id: string) => {
-    if (confirm("Burn this page from the Grimoire?")) {
+  const deleteRitualFromGrimoire = async (id: string) => {
+    const ok = await confirmDialog({
+      title: 'Delete Grimoire Pattern',
+      message: 'Burn this pattern page from the Ritual Grimoire?',
+      confirmLabel: 'Remove Page',
+      destructive: true,
+    });
+    if (ok) {
       const updated = savedRituals.filter(r => r.id !== id);
       setSavedRituals(updated);
       localStorage.setItem('codex_saved_rituals', JSON.stringify(updated));
@@ -155,7 +171,13 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
     event.preventDefault();
     const itemString = event.dataTransfer.getData('application/json');
     if (!itemString) return;
-    const item = JSON.parse(itemString) as RitualElementItem;
+    let item: RitualElementItem;
+    try {
+      item = JSON.parse(itemString) as RitualElementItem;
+    } catch {
+      notify('Dropped item payload was invalid JSON.', 'error');
+      return;
+    }
     const coords = getSVGCoordinates(event as unknown as React.MouseEvent);
 
     const newGlyph: PlacedGlyph = {
@@ -250,8 +272,16 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
     }
   }, [handleMouseMove, handleMouseUp, draggingGlyphId, connectingFromGlyphId]);
 
-  const clearLoom = () => {
-    if (placedGlyphs.length > 0 && !confirm("Are you sure you want to clear the loom? Unsaved patterns will be lost.")) return;
+  const clearLoom = async () => {
+    if (placedGlyphs.length > 0) {
+      const ok = await confirmDialog({
+        title: 'Clear Activation Loom',
+        message: 'Clear all glyphs and threads from the loom? Unsaved patterns will be lost.',
+        confirmLabel: 'Clear Loom',
+        destructive: true,
+      });
+      if (!ok) return;
+    }
     setPlacedGlyphs([]);
     setConnections([]);
     addEchoMessage('RitualLoom', 'Activation loom cleared.', 'text-slate-400');

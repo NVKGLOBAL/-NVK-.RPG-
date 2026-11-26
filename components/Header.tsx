@@ -63,6 +63,7 @@ interface HeaderProps {
   isOmegaAnchorDisabled?: boolean;
   // RPG Nexus
   onLaunchNexus: () => void;
+  onReturnToNexus?: () => void;
   // Export/Import/Save Slots
   onExportSave?: () => void;
   onImportSave?: (file: File) => void;
@@ -115,6 +116,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSystemRestore,
   isOmegaAnchorDisabled,
   onLaunchNexus,
+  onReturnToNexus,
   onExportSave,
   onImportSave,
   onOpenSaveLoadModal,
@@ -213,6 +215,16 @@ export const Header: React.FC<HeaderProps> = ({
       
       <div className="w-full flex justify-between items-center flex-wrap gap-y-2">
         <div className="flex items-center gap-4">
+            {onReturnToNexus && (
+              <button
+                onClick={onReturnToNexus}
+                className="px-2.5 py-1.5 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold flex items-center gap-1.5 transition shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+                title="Return to NVK Nexus Cinematic Landing"
+              >
+                <i className="ri-radar-line text-cyan-400"></i>
+                <span className="hidden sm:inline">NEXUS PORTAL</span>
+              </button>
+            )}
             <h1 className="text-lg md:text-2xl font-cinzel font-bold text-slate-100 flex items-center gap-2">
             <i className="ri-ancient-gate-fill text-indigo-500 md:hidden"></i>
             <span className="hidden md:inline">Tri-Sophian Codex</span>

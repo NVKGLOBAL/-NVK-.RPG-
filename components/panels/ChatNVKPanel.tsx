@@ -113,7 +113,7 @@ export const ChatNVKPanel: React.FC<ChatNVKPanelProps> = ({ activeProfile, addEc
 
             setPhase(SovereignPhase.AUDIT);
             setThinkingSteps(prev => [...prev, "Finalizing structural audit...", "Axiomatic alignment confirmed."]);
-            setMessages(prev => [...prev, { sender: 'Architect', text: "Artifact creation cycle complete. Firecracker VM is stable.", type: 'bot' }]);
+            setMessages(prev => [...prev, { sender: 'Architect', text: "Artifact creation cycle complete. Local IndexedDB Workspace is mounted and saved.", type: 'bot' }]);
             
         } catch (e) {
             setMessages(prev => [...prev, { sender: 'System', text: "Fatal resonance error in creation loop.", type: 'bot' }]);
@@ -319,7 +319,7 @@ export const ChatNVKPanel: React.FC<ChatNVKPanelProps> = ({ activeProfile, addEc
                             </button>
                         );
                     })}
-                    {!currentProject && <div className="text-center py-10 text-slate-600 italic text-xs">Awaiting VM instantiation...</div>}
+                    {!currentProject && <div className="text-center py-10 text-slate-600 italic text-xs">Awaiting local workspace instantiation...</div>}
                 </div>
 
                 {/* Merge Action Button (Fixed above preview) */}

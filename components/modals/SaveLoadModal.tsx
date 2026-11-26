@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { GameSaveSummary } from '../../types';
 import { Button } from '../ui/Button';
+import { useNotifications } from '../../context/NotificationContext';
 
 interface SaveLoadModalProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ const SaveLoadModal: React.FC<SaveLoadModalProps> = ({ isOpen, onClose, onSave, 
   const [saves, setSaves] = useState<Record<string, GameSaveSummary>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [autoSave, setAutoSave] = useState<GameSaveSummary | null>(null);
+  const { confirmDialog, notify } = useNotifications();
 
   const refreshSlots = async () => {
     setIsLoading(true);
@@ -74,9 +76,16 @@ const SaveLoadModal: React.FC<SaveLoadModalProps> = ({ isOpen, onClose, onSave, 
             )}
             <button 
                 onClick={async () => { 
-                    if(!isEmpty) {
-                        if(confirm("Load this reality? Unsaved progress will be lost.")) {
-                            await onLoad(slotId); 
+                    if (!isEmpty) {
+                        const ok = await confirmDialog({
+                          title: 'Restore Reality Pod',
+                          message: 'Load this reality? Unsaved progress in the active session will be overwritten.',
+                          confirmLabel: 'Load Reality',
+                          destructive: true,
+                        });
+                        if (ok) {
+                            await onLoad(slotId);
+                            notify(`Loaded save slot "${label}".`, 'success');
                             onClose();
                         }
                     }

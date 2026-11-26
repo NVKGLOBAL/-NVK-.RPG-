@@ -1,7 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
-import { useGemini } from './GeminiIntegrationContext';
 import { globalPCMPlayer } from '../lib/narration/PCMPlayer';
-import { Modality } from '@google/genai';
 
 interface NarrationContextType {
   isNarrationEnabled: boolean;
@@ -16,42 +14,71 @@ export const NarrationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const queueRef = useRef<Promise<void>>(Promise.resolve());
 
   const speak = useCallback(async (text: string, voiceName: string = 'Kore') => {
-    if (!isNarrationEnabled || !text) return;
+    if (!isNarrationEnabled || !text || !text.trim()) return;
 
-    const apiKey = typeof process !== 'undefined' && process.env ? process.env.API_KEY : (window as any).process?.env?.API_KEY;
+    // Clean markdown/symbols for clean pronunciation
+    const cleanText = text
+      .replace(/[#*`_~[\]()<>]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
 
     // Add to serial queue to prevent overlapping speech
     queueRef.current = queueRef.current.then(async () => {
-      try {
-        if (!apiKey) throw new Error("API Key missing");
-        
-        const { GoogleGenAI } = await import('@google/genai');
-        const ai = new GoogleGenAI({ apiKey });
-        const response = await ai.models.generateContent({
-          model: "gemini-2.5-flash-preview-tts",
-          contents: [{ parts: [{ text: `Read this clearly: ${text}` }] }],
-          config: {
-            responseModalities: [Modality.AUDIO],
-            speechConfig: {
-              voiceConfig: {
-                prebuiltVoiceConfig: { voiceName },
+      // 1. Check if user configured a Gemini key
+      const apiKey = 
+        (typeof localStorage !== 'undefined' ? localStorage.getItem('custom_ai_api_key') : null) ||
+        (typeof process !== 'undefined' && process.env ? (process.env.API_KEY || process.env.GEMINI_API_KEY) : undefined) ||
+        (window as any).process?.env?.API_KEY;
+
+      if (apiKey && apiKey.length > 20) {
+        try {
+          const { GoogleGenAI, Modality } = await import('@google/genai');
+          const ai = new GoogleGenAI({ apiKey });
+          const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash-preview-tts",
+            contents: [{ parts: [{ text: `Read this clearly: ${cleanText.substring(0, 500)}` }] }],
+            config: {
+              responseModalities: [Modality.AUDIO],
+              speechConfig: {
+                voiceConfig: {
+                  prebuiltVoiceConfig: { voiceName },
+                },
               },
             },
-          },
-        });
+          });
 
-        const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-        if (base64Audio) {
-          await globalPCMPlayer.play(base64Audio);
-        } else {
-          throw new Error("No audio data");
+          const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+          if (base64Audio) {
+            await globalPCMPlayer.play(base64Audio);
+            return;
+          }
+        } catch (e) {
+          // Seamless fallback to browser Web Speech API
         }
-      } catch (e) {
-        console.warn("Gemini TTS failed, falling back to WebSpeech", e);
+      }
+
+      // 2. High-Quality Zero-Latency Browser Web Speech API
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         return new Promise<void>((resolve) => {
-          const utterance = new SpeechSynthesisUtterance(text);
-          utterance.onend = () => resolve();
-          window.speechSynthesis.speak(utterance);
+          try {
+            window.speechSynthesis.cancel(); // Clear any hung utterances
+            const utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.rate = 1.0;
+            utterance.pitch = 0.98; // Slightly deeper, mystical cadence
+            
+            const voices = window.speechSynthesis.getVoices();
+            const preferredVoice = voices.find(v => 
+              v.lang.startsWith('en') && 
+              (v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Samantha') || v.name.includes('Daniel'))
+            );
+            if (preferredVoice) utterance.voice = preferredVoice;
+
+            utterance.onend = () => resolve();
+            utterance.onerror = () => resolve();
+            window.speechSynthesis.speak(utterance);
+          } catch (speechErr) {
+            resolve();
+          }
         });
       }
     });
@@ -63,10 +90,12 @@ export const NarrationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const newState = !isNarrationEnabled;
     setIsNarrationEnabled(newState);
     if (!newState) {
-      window.speechSynthesis.cancel();
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
       globalPCMPlayer.stopAll();
     } else {
-      speak("Narration protocol initialized. I will read incoming data streams for you.");
+      speak("Narration protocol active.");
     }
   };
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import { CodexModeId } from '../../types'; // Import CodexModeId
 import { getCodexModeDefinition } from './CodexModes'; // Import getCodexModeDefinition
+import { useNotifications } from '../../context/NotificationContext';
 
 type Props = {
   phase: string; 
@@ -9,9 +10,11 @@ type Props = {
   currentEntropy: number;
   currentCodexModeId: CodexModeId; 
   onApplyOmegaAnchor: () => void;
+  onRestoreSession?: () => Promise<void> | void;
 };
 
-const CodexFooterBar = ({ phase, mode, status, currentEntropy, currentCodexModeId, onApplyOmegaAnchor }: Props) => {
+const CodexFooterBar = ({ phase, mode, status, currentEntropy, currentCodexModeId, onApplyOmegaAnchor, onRestoreSession }: Props) => {
+  const { confirmDialog } = useNotifications();
   const isTemporalLoomActive = currentCodexModeId === CodexModeId.TARDIS_SYNCHRONICITY;
   const currentModeDef = getCodexModeDefinition(currentCodexModeId);
 
@@ -36,9 +39,19 @@ const CodexFooterBar = ({ phase, mode, status, currentEntropy, currentCodexModeI
     : "Apply Ω-Anchor to reduce system entropy by 0.1δ";
 
 
-  const handleSystemRestore = () => {
-    if (confirm('This will reset the current session to the last saved sacred state from your local codex. Unsaved changes may be lost. Proceed?')) {
-      window.location.reload();
+  const handleSystemRestore = async () => {
+    const ok = await confirmDialog({
+      title: 'Restore Sacred State',
+      message: 'This resets the current session to the last saved sacred state from your local codex. Unsaved changes may be lost.',
+      confirmLabel: 'Restore State',
+      destructive: true,
+    });
+    if (ok) {
+      if (onRestoreSession) {
+        await onRestoreSession();
+      } else {
+        window.location.reload();
+      }
     }
   };
 

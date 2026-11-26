@@ -254,6 +254,10 @@ export class SoundEngine {
     }, 2000);
   }
 
+  public getMuted(): boolean {
+    return this.isMuted;
+  }
+
   public toggleMute(muted: boolean) {
     this.isMuted = muted;
     if (this.audioContext && this.droneGain) {

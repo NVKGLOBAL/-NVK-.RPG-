@@ -290,9 +290,9 @@ const CommunityResonancePanel: React.FC<EnhancedCommunityResonancePanelProps> = 
             <div className="flex flex-col h-full animate-fade-in-up gap-4">
                  <div className="relative border border-slate-700/50 rounded-xl overflow-hidden bg-black/50 flex-shrink-0 shadow-inner" style={{height: '35%', minHeight: '200px'}}>
                     <canvas ref={canvasRef} className="w-full h-full block" />
-                    <div className="absolute top-3 right-3 text-xs font-mono text-cyan-400 flex items-center gap-2 bg-black/70 px-3 py-1.5 rounded-full border border-cyan-900/50 shadow-lg backdrop-blur-sm">
-                        <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span> 
-                        <span className="font-bold">{10000 + Math.floor(Math.random() * 50)}</span> Active
+                    <div className="absolute top-3 right-3 text-xs font-mono text-cyan-300 flex items-center gap-2 bg-black/75 px-3 py-1.5 rounded-md border border-cyan-900/50 shadow-lg backdrop-blur-sm">
+                        <span className="w-2 h-2 rounded-full bg-cyan-400"></span> 
+                        <span>LOCAL SANDBOX SIM</span>
                     </div>
                 </div>
 
@@ -405,7 +405,7 @@ const CommunityResonancePanel: React.FC<EnhancedCommunityResonancePanelProps> = 
       {/* Live Ticker Footer */}
       <div className="mt-3 pt-2 border-t border-slate-800/50">
         <div className="flex items-center text-xs text-slate-400 overflow-hidden h-5 bg-slate-900/50 rounded px-2">
-             <span className="text-emerald-400 mr-2 shrink-0 animate-pulse font-bold tracking-wider">● LIVE:</span>
+             <span className="text-cyan-400 mr-2 shrink-0 font-bold tracking-wider">SIM FEED:</span>
              <div className="flex flex-col animate-slide-up-fade w-full">
                 {liveFeed.length > 0 ? (
                     <span className="truncate text-slate-300">{liveFeed[0]}</span>

@@ -186,6 +186,9 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
 
   const [activeTab, setActiveTab] = useState<'profile' | 'grimoire'>('profile');
   
+  const [faction, setFaction] = useState(existingProfile?.faction || '');
+  const [newTraitInput, setNewTraitInput] = useState('');
+  const [editableTraits, setEditableTraits] = useState<string[]>(existingProfile?.selfTraits || []);
   const { generateImage, invokeGemini } = useGemini();
 
   // Update local state if existingProfile changes externally
@@ -199,7 +202,9 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
       if (existingProfile.auraColor) setAura(existingProfile.auraColor);
       if (existingProfile.auraSecondaryColor) setSecondaryAura(existingProfile.auraSecondaryColor);
       if (existingProfile.visualFilter) setVisualFilter(existingProfile.visualFilter);
-      if (existingProfile.avatarImageUrl) setAvatarUrl(existingProfile.avatarImageUrl);
+      setAvatarUrl(existingProfile.avatarImageUrl);
+      setFaction(existingProfile.faction || '');
+      setEditableTraits(existingProfile.selfTraits || []);
     }
   }, [existingProfile]);
 
@@ -257,10 +262,10 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
 
     if (isWeavingBio) return;
 
-    const selfTraits = existingProfile?.selfTraits || [
+    const selfTraits = editableTraits.length > 0 ? editableTraits : (existingProfile?.selfTraits || [
         TRAIT_LISTS.self[Math.floor(Math.random() * TRAIT_LISTS.self.length)],
         TRAIT_LISTS.self[Math.floor(Math.random() * TRAIT_LISTS.self.length)]
-    ];
+    ]);
     
     const codexTraits = existingProfile?.codexTraits || [
         TRAIT_LISTS.codex[Math.floor(Math.random() * TRAIT_LISTS.codex.length)]
@@ -284,6 +289,7 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
 
     const newProfile: SeekerProfile = {
         ...(existingProfile || {
+            id: `seeker-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
             generatedAt: Date.now(),
             level: 1,
             experience: 0,
@@ -300,6 +306,7 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
         auraColor: aura,
         auraSecondaryColor: secondaryAura,
         visualFilter,
+        faction: (faction || existingProfile?.faction) as SeekerProfile['faction'],
         selfTraits: Array.from(new Set(selfTraits)),
         codexTraits: Array.from(new Set(codexTraits)),
         avatarImageUrl: avatarUrl,
@@ -446,8 +453,112 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
                                     </select>
                                 </div>
                             </div>
+
+                            <div className="space-y-2 pt-2 border-t border-slate-800">
+                                <label className="text-xs text-indigo-300 font-bold uppercase tracking-wider">Knowledge Traits & Tags</label>
+                                <div className="flex flex-wrap gap-1.5">
+                                    {editableTraits.map((trait) => (
+                                        <span key={trait} className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs font-mono text-slate-200">
+                                            {trait}
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditableTraits(prev => prev.filter(t => t !== trait))}
+                                                className="text-slate-400 hover:text-rose-400 ml-1"
+                                                aria-label={`Remove trait ${trait}`}
+                                            >
+                                                ×
+                                            </button>
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={newTraitInput}
+                                        onChange={(e) => setNewTraitInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && newTraitInput.trim()) {
+                                                e.preventDefault();
+                                                setEditableTraits(prev => Array.from(new Set([...prev, newTraitInput.trim()])));
+                                                setNewTraitInput('');
+                                            }
+                                        }}
+                                        placeholder="Add custom trait or knowledge tag..."
+                                        className="flex-grow bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none"
+                                    />
+                                    <Button
+                                        type="button"
+                                        onClick={() => {
+                                            if (newTraitInput.trim()) {
+                                                setEditableTraits(prev => Array.from(new Set([...prev, newTraitInput.trim()])));
+                                                setNewTraitInput('');
+                                            }
+                                        }}
+                                        className="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2"
+                                    >
+                                        Add
+                                    </Button>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        )}
+
+        {activeTab === 'grimoire' && existingProfile && (
+            <div className="p-6 overflow-y-auto custom-scrollbar space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                        { label: 'Equipped Weapon', item: existingProfile.equippedWeapon, icon: 'ri-sword-line', color: 'text-rose-400' },
+                        { label: 'Equipped Outfit', item: existingProfile.equippedOutfit, icon: 'ri-t-shirt-line', color: 'text-emerald-400' },
+                        { label: 'Equipped Relic', item: existingProfile.equippedRelic, icon: 'ri-vip-diamond-line', color: 'text-amber-400' },
+                        { label: 'Companion Bond', item: existingProfile.equippedCompanion, icon: 'ri-bear-smile-line', color: 'text-cyan-400' },
+                    ].map((slot) => (
+                        <div key={slot.label} className="bg-slate-900/70 border border-slate-700/60 rounded-xl p-4 space-y-2">
+                            <div className={`text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5 ${slot.color}`}>
+                                <i className={slot.icon}></i>
+                                {slot.label}
+                            </div>
+                            <div className="text-sm font-cinzel font-bold text-white">
+                                {slot.item ? slot.item.name : 'Unbound Slot'}
+                            </div>
+                            <p className="text-xs text-slate-400 font-cormorant italic">
+                                {slot.item ? slot.item.description : 'Acquire or equip items in RPG Nexus.'}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="bg-slate-900/60 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <div className="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h4 className="font-cinzel font-bold text-indigo-300 text-sm uppercase">
+                            Bound Inventory & Relics ({existingProfile.inventory.length})
+                        </h4>
+                        <span className="text-xs font-mono text-amber-400">{existingProfile.flux} Flux</span>
+                    </div>
+                    {existingProfile.inventory.length === 0 ? (
+                        <p className="text-xs text-slate-500 italic py-4 text-center">No inventory shards bound yet.</p>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {existingProfile.inventory.map((item) => (
+                                <div key={item.id} className="p-3 rounded-lg bg-slate-950/70 border border-slate-800 flex items-start gap-3">
+                                    <div className="w-9 h-9 rounded-lg bg-indigo-950/60 border border-indigo-500/30 flex items-center justify-center text-indigo-300 shrink-0">
+                                        <i className={getCardTypeIcon(item.type)}></i>
+                                    </div>
+                                    <div className="min-w-0 flex-grow">
+                                        <div className="text-xs font-bold text-slate-100 truncate">{item.name}</div>
+                                        <div className="text-[10px] font-mono text-slate-400 uppercase">{item.type} • {item.rarity}</div>
+                                        {item.combatStats && (
+                                            <div className="text-[10px] font-mono text-indigo-300 mt-1">
+                                                ATK {item.combatStats.atk} / DEF {item.combatStats.def} / RES {item.combatStats.res}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </div>
         )}

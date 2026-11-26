@@ -26,10 +26,6 @@ const AgentChatPanel: React.FC<AgentChatPanelProps> = ({ agent, onClose }) => {
     setInput('');
     setMessages(prev => [...prev, { sender: 'Seeker', text: userMessage, isUser: true }]);
 
-    // Determine model based on agent properties (Multi-model Orchestration)
-    // e.g., 'Pro' for high cognition/logic, 'Flash' for others
-    const modelToUse = agent.stats.cognition > 0.7 ? 'gemini-3.1-pro-preview' : 'gemini-3-flash-preview';
-
     const systemPrompt = `You are ${agent.name}, an autonomous agent in the Tri-Sophian Codex simulation.
 Race: ${agent.race}
 Lineage: ${agent.lineage}
@@ -41,10 +37,10 @@ Stats: Cognition (${agent.stats.cognition.toFixed(2)}), Vitality (${agent.stats.
 
 Respond in character. Keep responses concise and flavorful, reflecting your faction and traits.`;
 
-    const prompt = `${systemPrompt}\n\nSeeker says: "${userMessage}"\n\nRespond as ${agent.name}:`;
+    const prompt = `Seeker says: "${userMessage}"\n\nRespond as ${agent.name}:`;
 
     try {
-      const response = await invokeGemini(prompt, modelToUse);
+      const response = await invokeGemini(prompt, systemPrompt);
       setMessages(prev => [...prev, { sender: agent.name, text: response || '*silence*', isUser: false }]);
     } catch (error) {
       console.error("Agent communication error:", error);

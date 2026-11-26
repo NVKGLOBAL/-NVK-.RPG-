@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import type { SeekerProfile, DuelCard, MarketItem, CardDuelState } from '../../types';
 import { ArtifactRarity, BattlePhase, AgentName } from '../../types';
 import { Button } from '../ui/Button';
@@ -94,6 +94,13 @@ const ProtocolDuelPanel: React.FC<ProtocolDuelPanelProps> = ({
 }) => {
   const [duelState, setDuelState] = useState<CardDuelState | null>(null);
   const [selectedDeck, setSelectedDeck] = useState<DuelCard[]>([]);
+  const roundTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+    };
+  }, []);
 
   // -- Helpers --
   const convertMarketItemToDuelCard = (item: MarketItem): DuelCard => {
@@ -204,7 +211,8 @@ const ProtocolDuelPanel: React.FC<ProtocolDuelPanelProps> = ({
           };
       });
 
-      setTimeout(() => resolveRound(), 1500);
+      if (roundTimeoutRef.current) clearTimeout(roundTimeoutRef.current);
+      roundTimeoutRef.current = setTimeout(() => resolveRound(), 1500);
   };
 
   const resolveRound = () => {
@@ -318,7 +326,7 @@ const ProtocolDuelPanel: React.FC<ProtocolDuelPanelProps> = ({
                 {/* Inventory Grid */}
                 <div className="flex-grow overflow-y-auto custom-scrollbar bg-slate-900/30 p-2 rounded-lg border border-slate-800">
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                        {activeProfile?.inventory.filter(item => ['Weapon','Relic','Companion','Augmentation'].includes(item.type)).map(item => (
+                        {activeProfile?.inventory.filter(item => ['Weapon', 'Armor', 'Relic', 'Companion', 'Augmentation', 'Construct'].includes(item.type)).map(item => (
                              <div key={item.id} className={`transform transition-all ${selectedDeck.find(c=>c.id===item.id) ? 'opacity-50 scale-95' : 'hover:scale-105'}`}>
                                  <BattleCard card={convertMarketItemToDuelCard(item)} onClick={() => handleDeckSelection(item)} />
                              </div>
