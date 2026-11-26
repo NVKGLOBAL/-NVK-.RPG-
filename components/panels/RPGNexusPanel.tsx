@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import type { RPGNexusPanelProps, RPGGameState, RPGGameLocation, RPGDynamicAction, MarketItem, SeekerProfile } from '../../types';
 import { AgentName, ArtifactType, ArtifactRarity } from '../../types';
 import { Button } from '../ui/Button';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 import { useNarration } from '../../context/NarrationContext';
 import { globalSoundEngine } from '../../lib/SoundEngine';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -109,7 +109,7 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
   onSaveState,
   onUpdateSystemMetrics
 }) => {
-  const { invokeGemini, generateImage } = useGemini();
+  const { invokeAI, generateImage } = useSovereignAI();
   const { speak } = useNarration();
   const logContainerRef = useRef<HTMLDivElement>(null);
   
@@ -174,7 +174,7 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
     Output: Only the mission text.`;
 
     try {
-      const response = await invokeGemini(prompt, "You are the Nexus Game Master.");
+      const response = await invokeAI(prompt, "You are the Nexus Game Master.");
       if (response) {
         const text = response.trim().replace(/^"|"$/g, '');
         setMissionInput(text);
@@ -206,7 +206,7 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
     - "genre": string ("${style?.name}")`;
 
     try {
-      const response = await invokeGemini(prompt, "You are an RPG JSON location generator.");
+      const response = await invokeAI(prompt, "You are an RPG JSON location generator.");
       const locations = cleanAndParseJSON<Record<string, ScanLocation>>(response);
       setScanResults(locations || FALLBACK_LOCATIONS);
       setGameState(prev => ({ ...prev, customMissionObjective: missionInput, partyIds }));
@@ -243,7 +243,7 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
       Provide vivid sensory description (2 sentences) and 3 logical actions.
       Return JSON: { "description": "...", "actions": [ { "id": "act_1", "label": "...", "type": "explore", "risk": 0.2 }, { "id": "act_2", "label": "...", "type": "explore", "risk": 0.4 }, { "id": "act_3", "label": "...", "type": "explore", "risk": 0.6 } ], "quest": { "title": "...", "description": "...", "rewards": { "xp": 100 } } }`;
 
-      const textResponseRaw = await invokeGemini(textPrompt, "Return valid JSON only.");
+      const textResponseRaw = await invokeAI(textPrompt, "Return valid JSON only.");
       const textData = cleanAndParseJSON<any>(textResponseRaw);
 
       if (textData) {
@@ -252,7 +252,7 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
         const imagePrompt = `Epic Environment Concept Art, ${style?.name} style. SCENE: ${textData.description}. CHARACTER: ${charDesc} ${partyDesc} exploring. Pure visual, no text.`;
         const referenceImage = activeProfile?.avatarImageUrl ? await urlToBase64(activeProfile.avatarImageUrl) : undefined;
 
-        generateImage(imagePrompt, 'gemini-2.5-flash-image', referenceImage).then(url => {
+        generateImage(imagePrompt, referenceImage).then(url => {
           if (url) {
             setGameState(prev => ({ 
                 ...prev, 
@@ -292,7 +292,7 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
     Return JSON: { "resultText": "...", "deltaIntegrity": 0, "deltaSanity": 0, "newActions": [ {"label": "...", "risk": 0.2}, {"label": "...", "risk": 0.4}, {"label": "...", "risk": 0.6} ] }`;
 
     try {
-        const response = await invokeGemini(prompt, "Return valid JSON only.");
+        const response = await invokeAI(prompt, "Return valid JSON only.");
         const outcome = cleanAndParseJSON<any>(response);
         if (outcome) {
             const newIntegrity = Math.max(0, Math.min(100, (gameState.vitals?.integrity || 100) + (outcome.deltaIntegrity || 0)));
@@ -308,7 +308,7 @@ const RPGNexusPanel: React.FC<RPGNexusPanelProps> = ({
 
             const charDesc = getCharacterVisualPrompt(activeProfile);
             const actionImagePrompt = `Cinematic Action, ${style?.name} style. RESULT: ${outcome.resultText}. CHARACTER: ${charDesc}. Purely visual.`;
-            generateImage(actionImagePrompt, 'gemini-2.5-flash-image').then(url => {
+            generateImage(actionImagePrompt).then(url => {
                  if (url) setGameState(prev => ({ ...prev, currentSceneImageUrl: url, sceneHistory: [...(prev.sceneHistory || []), { imageUrl: url, location: prev.currentLocation, description: outcome.resultText, timestamp: Date.now() }] }));
             });
         }

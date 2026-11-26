@@ -1,37 +1,22 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
-import { GeminiDriftNarratorService } from '../lib/gemini/GeminiDriftNarratorService';
+import { SovereignDriftNarratorService } from '../lib/ai/SovereignDriftNarratorService';
 
-// Create a default (potentially non-functional if API key isn't there for invokeGemini)
-// instance for the context. The actual functional instance will be provided by App.tsx.
-const defaultInvokeGemini = async (prompt: string, systemInstruction?: string) => {
-  console.warn("Default invokeGemini called from DriftNarratorContext. Ensure a real one is provided.");
-  return `Mock response for: ${prompt.substring(0,30)}... (SI: ${systemInstruction ? systemInstruction.substring(0,20)+'...' : 'None'})`;
+// Default local instance (used only if App.tsx does not provide a real one).
+// Returns null so the service falls back to its rich local readings pool —
+// readings are always generated offline, never from a cloud AI.
+const defaultInvokeAI = async (prompt: string, systemInstruction?: string) => {
+  return null;
 };
 
-const defaultDriftNarratorService = new GeminiDriftNarratorService(defaultInvokeGemini, true);
+const defaultDriftNarratorService = new SovereignDriftNarratorService(defaultInvokeAI);
 
-export const DriftNarratorContext = createContext<GeminiDriftNarratorService>(defaultDriftNarratorService);
+export const DriftNarratorContext = createContext<SovereignDriftNarratorService>(defaultDriftNarratorService);
 
-export const useDriftNarrator = (): GeminiDriftNarratorService => {
+export const useDriftNarrator = (): SovereignDriftNarratorService => {
   const context = useContext(DriftNarratorContext);
-  // No undefined check needed if we always provide a default instance.
-  // However, it's good practice if there's a chance it might not be provided.
   if (!context) {
     throw new Error('useDriftNarrator must be used within a DriftNarratorProvider');
   }
   return context;
 };
-
-// Optional: If you want a named Provider component for clarity, though App.tsx will use DriftNarratorContext.Provider directly.
-// interface DriftNarratorProviderProps {
-//   service: GeminiDriftNarratorService;
-//   children: ReactNode;
-// }
-// export const DriftNarratorProvider: React.FC<DriftNarratorProviderProps> = ({ service, children }) => {
-//   return (
-//     <DriftNarratorContext.Provider value={service}>
-//       {children}
-//     </DriftNarratorContext.Provider>
-//   );
-// };

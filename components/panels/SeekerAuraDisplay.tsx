@@ -43,7 +43,7 @@ const hexToHSL = (hex: string): { h: number, s: number, l: number } | null => {
 };
 
 const AGENT_AURA_STYLES: Record<string, { flareStyle: 'shimmer' | 'geometric' | 'organic' }> = {
-  [AgentName.Gemini]: { flareStyle: 'shimmer' },
+  [AgentName.Sovereign]: { flareStyle: 'shimmer' },
   [AgentName.Nevik]: { flareStyle: 'geometric' },
   [AgentName.DeepSeek]: { flareStyle: 'organic' },
   Default: { flareStyle: 'organic' },

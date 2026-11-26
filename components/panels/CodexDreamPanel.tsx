@@ -5,7 +5,6 @@ import { ArtMode, AgentName, HistoricalEventType, ArtifactType, ArtifactRarity }
 import { AGENT_PROFILES } from '../../constants';
 import ModeSelectorAny from '../core/ModeSelectorAny';
 import { Button } from '../ui/Button'; 
-import { GoogleGenAI } from "@google/genai";
 
 const ART_MODES = Object.values(ArtMode);
 

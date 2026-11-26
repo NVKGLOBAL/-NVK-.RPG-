@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import type { RPGSceneData, SeekerProfile } from '../../types';
 import { AgentName } from '../../types';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 import { QuestCinemaEngine } from '../../lib/video/QuestCinemaEngine';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -23,7 +23,7 @@ const RPGMementoArchivePanel: React.FC<RPGMementoArchivePanelProps> = ({
     currentEntropy,
     addEchoMessage
 }) => {
-    const { generateSpeech } = useGemini();
+    const { generateSpeech } = useSovereignAI();
     const [isExporting, setIsExporting] = useState<string | null>(null);
     const [progress, setProgress] = useState(0);
 

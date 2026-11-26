@@ -3,7 +3,7 @@
 
 export enum AgentName {
     System = "System",
-    Gemini = "Gemini",
+    Sovereign = "Sovereign",
     DeepSeek = "DeepSeek",
     Nevik = "Nevik",
     AxiomResonance = "AxiomResonance",
@@ -31,7 +31,7 @@ export enum AgentName {
     EmeraldTablet = "EmeraldTablet",
     DatachegaProtocol = "DatachegaProtocol",
     PrimeConductor = "PrimeConductor",
-    GeminiDriftNarrator = "GeminiDriftNarrator",
+    SovereignDriftNarrator = "SovereignDriftNarrator",
     ExoticMechanismAgent = "ExoticMechanismAgent",
     OmegaLayer = "OmegaLayer",
     CodexDreamPanelAgent = "CodexDreamPanelAgent",
@@ -689,7 +689,7 @@ export interface GlyphOrbit {
     interpretations: AgentInterpretation[];
 }
 
-export interface GeminiGlyphInterpretation {
+export interface SovereignGlyphInterpretation {
     glyphSymbol: string;
     interpretationText: string;
     ritualContext: string;
@@ -707,7 +707,7 @@ export interface IDriftInterpretationDB {
     id?: number;
     glyphId: string;
     glyphSymbol: string;
-    geminiReading: string;
+    oracleReading: string;
     agentConsensus: string;
     entropy: number;
     driftScore: number;
@@ -1256,26 +1256,22 @@ export interface ConstellationNode {
 }
 
 /**
- * Properties for the Gemini Oracle provider.
+ * Properties for the Sovereign AI provider (local procedural engine + optional open inference).
+ * No Gemini, no API keys required.
  */
-export interface GeminiContextType {
+export interface SovereignAIContextType {
     isGenerating: boolean;
     error: Error | null;
-    lastGeminiResponseText: string | null;
+    lastAIResponseText: string | null;
     selectedModelId: string;
     setSelectedModelId: (id: string) => void;
     customModelInput: string;
     setCustomModelInput: (model: string) => void;
-    customApiKey: string;
-    setCustomApiKey: (key: string) => void;
-    hasActiveKey: boolean;
-    effectiveApiKey: string | null;
     availableModels: { id: string; name: string; description: string; category?: string }[];
     testConnection: () => Promise<{ success: boolean; message: string }>;
-    invokeGemini: (prompt: string, systemInstruction?: string, responseMimeType?: "text/plain" | "application/json", model?: string) => Promise<string | null>;
-    generateImage: (prompt: string, model?: 'imagen-4.0-generate-001' | 'gemini-2.5-flash-image' | string, referenceImage?: string) => Promise<string | null>;
-    generateVideo: (prompt: string, imageBase64?: string) => Promise<string | null>;
-    generateSpeech: (text: string, voiceName?: string) => Promise<ArrayBuffer | null>;
+    invokeAI: (prompt: string, arg2?: string, responseMimeType?: "text/plain" | "application/json", model?: string) => Promise<string | null>;
+    generateImage: (prompt: string, referenceImage?: string) => Promise<string | null>;
+    generateSpeech: (text: string) => Promise<ArrayBuffer | null>;
     generateEmbedding: (text: string) => Promise<number[] | null>;
     semanticSearch: (query: string, entries: VectorMemoryEntry[], topK?: number) => Promise<VectorMemoryEntry[]>;
 }
@@ -1392,7 +1388,7 @@ export interface SigilBloomVariantPanelProps {
     selectedBloomVariantId: string | null;
     onSelectBloomVariant: (id: string) => void;
     isGeneratingBloomVariants: boolean;
-    isGeminiBusy: boolean;
+    isAIBusy: boolean;
 }
 
 /**

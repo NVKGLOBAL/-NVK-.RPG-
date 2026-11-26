@@ -14,7 +14,6 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "framer-motion": "11.11.17",
-    "@google/genai": "1.5.1",
     "three": "0.171.0",
     "dexie": "4.0.11",
     "gsap": "3.12.5",

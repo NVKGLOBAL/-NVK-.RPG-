@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 import { AgentName, ArtifactType, ArtifactRarity } from '../../types';
 import { globalSoundEngine } from '../../lib/SoundEngine';
 
@@ -41,7 +41,7 @@ const PrimeGenesisPanel: React.FC<any> = ({ width, height, addEchoMessage, onArt
     const [resultImage, setResultImage] = useState<string | null>(null);
     const [isWeaving, setIsWeaving] = useState(false);
     const [isSpeaking, setIsSpeaking] = useState(false);
-    const { invokeGemini, generateImage, generateSpeech } = useGemini();
+    const { invokeAI, generateImage, generateSpeech } = useSovereignAI();
 
     const handleSelectMovement = async (m: GenesisMovement) => {
         if (isWeaving) return;
@@ -54,8 +54,8 @@ const PrimeGenesisPanel: React.FC<any> = ({ width, height, addEchoMessage, onArt
 
         try {
             const [text, img] = await Promise.all([
-                invokeGemini(m.prompt, "You are the Prime Conductor of a transcended cosmic reality."),
-                generateImage(`Masterpiece vision, ${m.title}. Non-commutative geometry. No text.`, 'gemini-2.5-flash-image')
+                invokeAI(m.prompt, "You are the Prime Conductor of a transcended cosmic reality."),
+                generateImage(`Masterpiece vision, ${m.title}. Non-commutative geometry. No text.`)
             ]);
             setResultText(text);
             setResultImage(img);

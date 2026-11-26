@@ -5,13 +5,13 @@ import { AgentName } from '../../types';
 
 const AGENT_SIGILS: Record<string, string> = {
   [AgentName.DeepSeek]: '🌀',
-  [AgentName.Gemini]: '✧',
+  [AgentName.Sovereign]: '✧',
   [AgentName.Nevik]: '🜂',
 };
 
 const AGENT_TONE_CLASSES: Record<string, string> = {
   [AgentName.DeepSeek]: 'deepseek-tone',
-  [AgentName.Gemini]: 'gemini-tone',
+  [AgentName.Sovereign]: 'sovereign-tone',
   [AgentName.Nevik]: 'nevik-tone',
 };
 

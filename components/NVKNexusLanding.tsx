@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { NexusAtmosphereCanvas } from './visuals/NexusAtmosphereCanvas';
 import { NexusCursor } from './visuals/NexusCursor';
 import { globalSoundEngine } from '../lib/SoundEngine';
-import { useGemini } from '../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../context/SovereignAIContext';
 
 interface NVKNexusLandingProps {
   onEnterEcosystem: () => void;
@@ -25,7 +25,7 @@ export const NVKNexusLanding: React.FC<NVKNexusLandingProps> = ({
   const [aiDemoOutput, setAiDemoOutput] = useState<string | null>(null);
   const [isAiDemoGenerating, setIsAiDemoGenerating] = useState(false);
 
-  const { invokeGemini, selectedModelId } = useGemini();
+  const { invokeAI, selectedModelId } = useSovereignAI();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Track scroll position for spatial layers and active chapter detection
@@ -78,7 +78,7 @@ export const NVKNexusLanding: React.FC<NVKNexusLandingProps> = ({
     setIsAiDemoGenerating(true);
     globalSoundEngine.playUIFeedback('click');
     try {
-      const response = await invokeGemini(
+      const response = await invokeAI(
         aiDemoPrompt,
         "You are the NVK Sovereign Intelligence Oracle. Speak in concise, profound cosmic aphorisms (max 2 sentences)."
       );
@@ -297,7 +297,7 @@ export const NVKNexusLanding: React.FC<NVKNexusLandingProps> = ({
                 },
                 {
                   title: 'Model Agnostic Architecture',
-                  desc: 'Instantly swap between Gemini 3.5, Gemini 3.1 Pro, Ollama/Local runtimes, Groq, or custom fine-tuned checkpoints without touching code.',
+                  desc: 'Instantly swap between the local Sovereign Procedural Engine, Ollama/Local runtimes, Pollinations open inference, or custom models without touching code.',
                   icon: 'ri-shuffle-line',
                   badge: 'Swappable',
                 },

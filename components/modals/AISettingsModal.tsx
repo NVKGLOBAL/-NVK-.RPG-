@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 import { Button } from '../ui/Button';
 
 interface AISettingsModalProps {
@@ -13,19 +13,13 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
     setSelectedModelId, 
     customModelInput, 
     setCustomModelInput, 
-    customApiKey, 
-    setCustomApiKey, 
-    hasActiveKey, 
-    effectiveApiKey,
     availableModels, 
     testConnection,
     isGenerating 
-  } = useGemini();
+  } = useSovereignAI();
 
   const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
   const [isTesting, setIsTesting] = useState(false);
-  const [showKeyInput, setShowKeyInput] = useState(false);
-  const [tempApiKey, setTempApiKey] = useState(customApiKey);
 
   if (!isOpen) return null;
 
@@ -35,17 +29,6 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
     const result = await testConnection();
     setTestResult(result);
     setIsTesting(false);
-  };
-
-  const handleSaveApiKey = () => {
-    setCustomApiKey(tempApiKey);
-    setTestResult(null);
-  };
-
-  const handleClearApiKey = () => {
-    setTempApiKey('');
-    setCustomApiKey('');
-    setTestResult(null);
   };
 
   const isCustom = selectedModelId === 'custom';
@@ -87,7 +70,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                 <div className="flex items-center gap-2">
                   <h4 className="text-sm font-bold">Zero-Key Mode: ACTIVE & READY</h4>
                   <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-500/20 border border-emerald-500/40 text-emerald-300">
-                    No Gemini Key Required
+                    No API Key Required
                   </span>
                 </div>
                 <p className="text-xs text-slate-300 mt-1">
@@ -98,7 +81,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-3 pt-3 border-t border-emerald-500/20">
                   <div className="bg-slate-950/60 p-2 rounded border border-emerald-500/20 text-center">
                     <span className="text-[10px] text-slate-400 block font-mono">LLM REASONING</span>
-                    <span className="text-xs font-bold text-emerald-400">Open Pollinations</span>
+                    <span className="text-xs font-bold text-emerald-400">Sovereign Local</span>
                   </div>
                   <div className="bg-slate-950/60 p-2 rounded border border-emerald-500/20 text-center">
                     <span className="text-[10px] text-slate-400 block font-mono">IMAGE SYNTHESIS</span>
@@ -115,11 +98,6 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                 </div>
               </div>
             </div>
-            {effectiveApiKey && (
-              <span className="text-[10px] font-mono px-2.5 py-1 rounded-md bg-slate-950/80 border border-slate-700 text-slate-400 shrink-0">
-                Custom Key: ••••{effectiveApiKey.slice(-4)}
-              </span>
-            )}
           </div>
 
           {/* Model Selection */}
@@ -166,7 +144,7 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
                 type="text"
                 value={customModelInput}
                 onChange={(e) => setCustomModelInput(e.target.value)}
-                placeholder="e.g., pollinations-deepseek or gemini-3.5-flash"
+                placeholder="e.g., pollinations-deepseek or ollama:llama3.1"
                 className="w-full px-3.5 py-2 text-sm bg-slate-900 border border-slate-700 rounded-lg text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500 font-mono"
               />
               <p className="text-[11px] text-slate-400">
@@ -174,47 +152,6 @@ export const AISettingsModal: React.FC<AISettingsModalProps> = ({ isOpen, onClos
               </p>
             </div>
           )}
-
-          {/* Optional Custom API Key Override */}
-          <div className="p-4 rounded-xl bg-slate-950/40 border border-slate-800 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-bold text-slate-200">Optional: Custom API Key Override</h4>
-                <p className="text-xs text-slate-400">Only needed if you specifically want to link an external private Gemini or OpenAI quota.</p>
-              </div>
-              <button
-                onClick={() => setShowKeyInput(!showKeyInput)}
-                className="text-xs text-indigo-400 hover:text-indigo-300 underline font-medium"
-              >
-                {showKeyInput ? 'Hide Key Input' : (customApiKey ? 'Edit Custom Key' : 'Add Custom Key (Optional)')}
-              </button>
-            </div>
-
-            {showKeyInput && (
-              <div className="pt-2 space-y-3 border-t border-slate-800/80 animate-fade-in">
-                <div className="flex gap-2">
-                  <input
-                    type="password"
-                    value={tempApiKey}
-                    onChange={(e) => setTempApiKey(e.target.value)}
-                    placeholder="AIzaSy... (Optional)"
-                    className="flex-1 px-3 py-2 text-sm bg-slate-900 border border-slate-700 rounded-lg text-slate-100 focus:outline-none focus:border-indigo-500 font-mono"
-                  />
-                  <Button onClick={handleSaveApiKey} className="bg-indigo-600 hover:bg-indigo-500 text-xs px-4">
-                    Save Key
-                  </Button>
-                  {customApiKey && (
-                    <Button onClick={handleClearApiKey} className="bg-rose-900/60 hover:bg-rose-800 text-xs px-3 text-rose-300 border border-rose-700/50">
-                      Clear
-                    </Button>
-                  )}
-                </div>
-                <p className="text-[11px] text-slate-500">
-                  Custom keys are kept securely in browser localStorage only.
-                </p>
-              </div>
-            )}
-          </div>
 
           {/* Test Diagnostics */}
           {testResult && (

@@ -1,20 +1,26 @@
-import { GoogleGenAI, GenerateContentResponse } from "@google/genai";
 import {
   executeProceduralReasoning,
   generateProceduralAudioBuffer,
   generateLocalVectorEmbedding,
   getDeterministicSeed,
-} from "../gemini/SovereignProceduralAI";
+} from "./SovereignProceduralAI";
 
 export interface AIModelOption {
   id: string;
   name: string;
   description: string;
   category: string;
-  provider: "pollinations" | "local-procedural" | "gemini" | "ollama" | "custom";
+  provider: "pollinations" | "local-procedural" | "ollama" | "custom";
 }
 
 export const NVK_AVAILABLE_MODELS: AIModelOption[] = [
+  {
+    id: "nvk-local-neural",
+    name: "NVK Sovereign Procedural Engine",
+    description: "100% client-side deterministic reasoning oracle. Zero network latency, offline-first.",
+    category: "Autonomous Local",
+    provider: "local-procedural",
+  },
   {
     id: "pollinations-openai",
     name: "Pollinations AI (Open)",
@@ -44,32 +50,11 @@ export const NVK_AVAILABLE_MODELS: AIModelOption[] = [
     provider: "pollinations",
   },
   {
-    id: "nvk-local-neural",
-    name: "NVK Sovereign Procedural Engine",
-    description: "100% client-side deterministic reasoning oracle. Zero network latency, offline-first.",
-    category: "Autonomous Local",
-    provider: "local-procedural",
-  },
-  {
     id: "ollama-local",
     name: "Ollama Local Node (localhost:11434)",
     description: "Connect directly to a local Ollama server (`ollama serve`).",
     category: "Local Infrastructure",
     provider: "ollama",
-  },
-  {
-    id: "gemini-2.5-flash",
-    name: "Google Gemini 2.5 Flash (BYOK)",
-    description: "Multimodal flash engine when a user-supplied Gemini API key is configured.",
-    category: "Google Gemini (Optional BYOK)",
-    provider: "gemini",
-  },
-  {
-    id: "gemini-2.5-pro",
-    name: "Google Gemini 2.5 Pro (BYOK)",
-    description: "Deep reasoning engine when a user-supplied Gemini API key is configured.",
-    category: "Google Gemini (Optional BYOK)",
-    provider: "gemini",
   },
   {
     id: "custom",
@@ -80,16 +65,29 @@ export const NVK_AVAILABLE_MODELS: AIModelOption[] = [
   },
 ];
 
-const LEGACY_GEMINI_MODEL_ALIASES: Record<string, string> = {
-  "gemini-3-pro-preview": "gemini-2.5-pro",
-  "gemini-3.1-pro-preview": "gemini-2.5-pro",
-  "gemini-3-flash-preview": "gemini-2.5-flash",
-  "gemini-3.5-flash": "gemini-2.5-flash",
+// Historical model ids from before the Gemini purge. Any saved selection that
+// still names a removed provider resolves to the local procedural engine so
+// the game keeps working with zero network calls.
+const REMOVED_PROVIDER_ALIASES: Record<string, string> = {
+  "gemini-3-pro-preview": "nvk-local-neural",
+  "gemini-3.1-pro-preview": "nvk-local-neural",
+  "gemini-3-flash-preview": "nvk-local-neural",
+  "gemini-3.5-flash": "nvk-local-neural",
+  "gemini-2.5-flash": "nvk-local-neural",
+  "gemini-2.5-pro": "nvk-local-neural",
+  "gemini-flash-latest": "nvk-local-neural",
+  "gemini-3.1-flash-lite": "nvk-local-neural",
+  "gemini-2.5-flash-image": "nvk-local-neural",
+  "imagen-4.0-generate-001": "nvk-local-neural",
+  "imagen-3.0-generate-002": "nvk-local-neural",
 };
 
 export function normalizeModelId(requestedModel: string): string {
   const trimmed = requestedModel.trim();
-  return LEGACY_GEMINI_MODEL_ALIASES[trimmed] || trimmed;
+  if (trimmed.startsWith("gemini-") || trimmed.startsWith("imagen-")) {
+    return "nvk-local-neural";
+  }
+  return REMOVED_PROVIDER_ALIASES[trimmed] || trimmed;
 }
 
 export function resolveAdapterModelId(
@@ -97,9 +95,9 @@ export function resolveAdapterModelId(
   customModelInput: string,
   requestedModel?: string
 ): string {
-  let target = requestedModel || selectedModelId || "pollinations-openai";
+  let target = requestedModel || selectedModelId || "nvk-local-neural";
   if (target === "custom") {
-    target = customModelInput.trim() || "pollinations-openai";
+    target = customModelInput.trim() || "nvk-local-neural";
   }
   return normalizeModelId(target);
 }
@@ -162,7 +160,6 @@ export interface AdapterTextParams {
   systemInstruction?: string;
   responseMimeType?: "text/plain" | "application/json";
   modelId: string;
-  apiKey?: string | null;
   ollamaBaseUrl?: string;
 }
 
@@ -179,13 +176,12 @@ export async function invokeAdapterText(params: AdapterTextParams): Promise<Adap
     systemInstruction,
     responseMimeType,
     modelId,
-    apiKey,
     ollamaBaseUrl = "http://localhost:11434",
   } = params;
 
   const normalizedModel = normalizeModelId(modelId);
 
-  // Explicit Local Sovereign Procedural Engine
+  // 1. NVK Sovereign Procedural Engine (default, offline)
   if (normalizedModel === "nvk-local-neural") {
     return {
       text: executeProceduralReasoning(prompt, systemInstruction, responseMimeType),
@@ -195,40 +191,11 @@ export async function invokeAdapterText(params: AdapterTextParams): Promise<Adap
     };
   }
 
-  // 1. Optional Google Gemini BYOK
-  if (apiKey && (normalizedModel.startsWith("gemini-") || normalizedModel.startsWith("imagen-"))) {
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response: GenerateContentResponse = await ai.models.generateContent({
-        model: normalizedModel,
-        contents: prompt,
-        config: {
-          ...(systemInstruction && { systemInstruction }),
-          ...(responseMimeType && { responseMimeType }),
-        },
-      });
-      const text = response.text?.trim();
-      if (text) {
-        return {
-          text,
-          providerUsed: "gemini",
-          modelUsed: normalizedModel,
-          fallbackUsed: false,
-        };
-      }
-    } catch (geminiError) {
-      console.warn("[NVK AI Adapter] Gemini request fell back to open/local chain:", geminiError);
-    }
-  }
-
   // 2. Local Ollama Node execution
   const isOllamaExplicit =
     normalizedModel === "ollama-local" ||
     normalizedModel.startsWith("ollama:") ||
-    (!normalizedModel.startsWith("pollinations-") &&
-      !normalizedModel.startsWith("gemini-") &&
-      !normalizedModel.startsWith("imagen-") &&
-      normalizedModel !== "nvk-local-neural");
+    (!normalizedModel.startsWith("pollinations-") && normalizedModel !== "nvk-local-neural");
 
   if (isOllamaExplicit) {
     const ollamaModel =
@@ -325,31 +292,13 @@ export async function invokeAdapterText(params: AdapterTextParams): Promise<Adap
 
 export async function invokeAdapterImage(params: {
   prompt: string;
-  model?: string;
-  apiKey?: string | null;
   preferOffline?: boolean;
 }): Promise<string> {
-  const { prompt, model, apiKey, preferOffline } = params;
+  const { prompt, preferOffline } = params;
   const cleanPrompt = prompt.replace(/[^\w\s,.-]/gi, " ").trim() || "abstract mystic sigil";
   const seed = getDeterministicSeed(prompt);
 
-  if (!preferOffline && apiKey && (model === "imagen-4.0-generate-001" || model === "imagen-3.0-generate-002")) {
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const response = await ai.models.generateImages({
-        model: "imagen-3.0-generate-002",
-        prompt: cleanPrompt,
-        config: { numberOfImages: 1, outputMimeType: "image/png", aspectRatio: "1:1" },
-      });
-      if (response.generatedImages?.[0]?.image?.imageBytes) {
-        return `data:image/png;base64,${response.generatedImages[0].image.imageBytes}`;
-      }
-    } catch (e) {
-      console.warn("[NVK AI Adapter] Gemini image generation fallback:", e);
-    }
-  }
-
-  if (!preferOffline && typeof navigator === "undefined" ? false : typeof navigator !== "undefined" && navigator.onLine !== false) {
+  if (!preferOffline && typeof navigator !== "undefined" && navigator.onLine !== false) {
     const enhancedPrompt = `${cleanPrompt}, detailed fantasy sci-fi concept art, atmospheric lighting`;
     return `https://image.pollinations.ai/prompt/${encodeURIComponent(enhancedPrompt)}?width=512&height=512&seed=${seed}&nologo=true&model=flux`;
   }
@@ -357,21 +306,7 @@ export async function invokeAdapterImage(params: {
   return generateProceduralSvgArtwork(prompt);
 }
 
-export async function invokeAdapterEmbedding(text: string, apiKey?: string | null): Promise<number[]> {
-  if (apiKey) {
-    try {
-      const ai = new GoogleGenAI({ apiKey });
-      const result = await ai.models.embedContent({
-        model: "gemini-embedding-001",
-        contents: [text],
-      });
-      if (result.embeddings?.[0]?.values) {
-        return result.embeddings[0].values;
-      }
-    } catch (e) {
-      console.warn("[NVK AI Adapter] Gemini embedding unavailable, using local vector space:", e);
-    }
-  }
+export async function invokeAdapterEmbedding(text: string): Promise<number[]> {
   return generateLocalVectorEmbedding(text);
 }
 

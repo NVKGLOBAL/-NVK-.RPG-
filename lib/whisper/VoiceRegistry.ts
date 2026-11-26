@@ -4,7 +4,7 @@ import type { VoiceProfile as VoiceProfileTypeDefinitionOnly } from './VoiceRegi
 // VoiceEngine class definition removed from here. It should be imported from ./VoiceEngine.ts
 
 // Agent persona definitions
-export type AgentPersona = 'EchoScribe' | 'AshEngine' | 'QuantumAgent' | 'Gemini' | 'Nevik' | 'SystemDebug' | 'RPGNexusAgent';
+export type AgentPersona = 'EchoScribe' | 'AshEngine' | 'QuantumAgent' | 'Sovereign' | 'Nevik' | 'SystemDebug' | 'RPGNexusAgent';
 
 export interface WhisperTrigger {
   type: 'entropy' | 'trait' | 'playback' | 'glyph';
@@ -104,8 +104,8 @@ export const voiceProfiles: VoiceProfile[] = [
     effects: { distortion: 0.4, reverb: 0.1 }
   },
   {
-    id: 'gemini_v1', // Added Gemini profile
-    agent: 'Gemini',
+    id: 'sovereign_v1', // Added Sovereign profile
+    agent: 'Sovereign',
     engine: 'webspeech',
     params: {
       voiceURI: 'Microsoft Zira Desktop - English (United States)', // A common Windows voice
@@ -172,8 +172,8 @@ export const whisperRegistry: AgentWhisper[] = [
     color: '#8b5cf6', // Violet
   },
   {
-    id: 'playback_play_gemini',
-    agent: 'Gemini',
+    id: 'playback_play_sovereign',
+    agent: 'Sovereign',
     message: "The past unspools. Watch for echoes that still resonate.",
     triggers: [{ type: 'playback', state: 'playing' }],
     color: '#10b981', // Emerald

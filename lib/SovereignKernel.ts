@@ -13,21 +13,19 @@ function parseJsonBlock<T>(raw: string): T | null {
 }
 
 export class SovereignKernel {
-  private getAdapterRuntimeConfig(): { modelId: string; apiKey: string | null } {
+  private getAdapterRuntimeConfig(): { modelId: string } {
     if (typeof window === 'undefined') {
-      return { modelId: 'nvk-local-neural', apiKey: null };
+      return { modelId: 'nvk-local-neural' };
     }
     const selected = localStorage.getItem('selected_ai_model') || 'pollinations-openai';
     const custom = localStorage.getItem('custom_ai_model') || '';
-    const apiKey = localStorage.getItem('custom_ai_api_key') || null;
     return {
       modelId: resolveAdapterModelId(selected, custom),
-      apiKey,
     };
   }
 
   async researchGoal(goal: string): Promise<{ summary: string; thinking: string[] }> {
-    const { modelId, apiKey } = this.getAdapterRuntimeConfig();
+    const { modelId } = this.getAdapterRuntimeConfig();
     const prompt = `Conduct structured technical and conceptual research on: "${goal}".
 Return JSON with keys: {"summary": "2-3 sentence synthesis", "thinking": ["step 1", "step 2", "step 3"]}.`;
 
@@ -37,8 +35,7 @@ Return JSON with keys: {"summary": "2-3 sentence synthesis", "thinking": ["step 
         systemInstruction: 'You are the NVK Sovereign Architect kernel. Be concise, technical, and grounded.',
         responseMimeType: 'application/json',
         modelId,
-        apiKey,
-      });
+        });
 
       const parsed = parseJsonBlock<{ summary?: string; thinking?: string[] }>(result.text);
       if (parsed?.summary) {
@@ -70,7 +67,7 @@ Return JSON with keys: {"summary": "2-3 sentence synthesis", "thinking": ["step 
   }
 
   async generatePlan(goal: string, research: string): Promise<AgentPlan> {
-    const { modelId, apiKey } = this.getAdapterRuntimeConfig();
+    const { modelId } = this.getAdapterRuntimeConfig();
     const prompt = `Goal: ${goal}\nResearch Context: ${research}\nCreate a Sovereign Plan as JSON:
 {"objective":"...","steps":[{"id":"step_1","description":"...","tool":"Planner","status":"todo"}],"thinking_process":["..."]}`;
 
@@ -80,8 +77,7 @@ Return JSON with keys: {"summary": "2-3 sentence synthesis", "thinking": ["step 
         systemInstruction: 'Output valid JSON matching the AgentPlan schema.',
         responseMimeType: 'application/json',
         modelId,
-        apiKey,
-      });
+        });
 
       const parsed = parseJsonBlock<AgentPlan>(result.text);
       if (parsed && parsed.objective && Array.isArray(parsed.steps) && parsed.steps.length > 0) {
@@ -134,7 +130,7 @@ Return JSON with keys: {"summary": "2-3 sentence synthesis", "thinking": ["step 
   async mergeArtifacts(
     files: ProjectFile[]
   ): Promise<{ name: string; content: string; thinking: string[] }> {
-    const { modelId, apiKey } = this.getAdapterRuntimeConfig();
+    const { modelId } = this.getAdapterRuntimeConfig();
     const context = files.map((f) => `File: ${f.path}\nContent: ${f.content}`).join('\n\n---\n\n');
 
     const prompt = `Conduct Harmonic Idea Fusion on these workspace files:\n\n${context}\n\nReturn JSON:
@@ -146,8 +142,7 @@ Return JSON with keys: {"summary": "2-3 sentence synthesis", "thinking": ["step 
         systemInstruction: 'Synthesize these artifacts cleanly and return valid JSON.',
         responseMimeType: 'application/json',
         modelId,
-        apiKey,
-      });
+        });
 
       const parsed = parseJsonBlock<{
         artifactName?: string;

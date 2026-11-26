@@ -22,7 +22,7 @@ export const generateInitialGrid = (): SimulationGrid => {
 };
 
 export const generateInitialAgents = (): AgentNode[] => {
-  const AGENT_NAMES = ['Gemini', 'Nevik', 'Sophia', 'Orion', 'Lyra', 'Vega', 'Helix', 'Cipher'];
+  const AGENT_NAMES = ['Sovereign', 'Nevik', 'Sophia', 'Orion', 'Lyra', 'Vega', 'Helix', 'Cipher'];
   return AGENT_NAMES.map((name, i) => {
     const position: GridPoint = [
       Math.floor(Math.random() * GRID_DIMENSIONS.cols),

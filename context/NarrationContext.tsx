@@ -24,40 +24,7 @@ export const NarrationProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     // Add to serial queue to prevent overlapping speech
     queueRef.current = queueRef.current.then(async () => {
-      // 1. Check if user configured a Gemini key
-      const apiKey = 
-        (typeof localStorage !== 'undefined' ? localStorage.getItem('custom_ai_api_key') : null) ||
-        (typeof process !== 'undefined' && process.env ? (process.env.API_KEY || process.env.GEMINI_API_KEY) : undefined) ||
-        (window as any).process?.env?.API_KEY;
-
-      if (apiKey && apiKey.length > 20) {
-        try {
-          const { GoogleGenAI, Modality } = await import('@google/genai');
-          const ai = new GoogleGenAI({ apiKey });
-          const response = await ai.models.generateContent({
-            model: "gemini-2.5-flash-preview-tts",
-            contents: [{ parts: [{ text: `Read this clearly: ${cleanText.substring(0, 500)}` }] }],
-            config: {
-              responseModalities: [Modality.AUDIO],
-              speechConfig: {
-                voiceConfig: {
-                  prebuiltVoiceConfig: { voiceName },
-                },
-              },
-            },
-          });
-
-          const base64Audio = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
-          if (base64Audio) {
-            await globalPCMPlayer.play(base64Audio);
-            return;
-          }
-        } catch (e) {
-          // Seamless fallback to browser Web Speech API
-        }
-      }
-
-      // 2. High-Quality Zero-Latency Browser Web Speech API
+      // Browser Web Speech API (local, no cloud key, no external AI service)
       if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
         return new Promise<void>((resolve) => {
           try {

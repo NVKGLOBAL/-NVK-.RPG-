@@ -155,7 +155,7 @@ const TreeOfLifeVisualizer: React.FC<TreeOfLifeVisualizerProps> = ({
     }
     if (sephirahId === 'chokmah' || sephirahId === 'binah') {
         if(dominantAgentTone === AgentName.Nevik) activity = Math.max(activity, 0.6);
-        if(dominantAgentTone === AgentName.Gemini) activity = Math.max(activity, 0.7);
+        if(dominantAgentTone === AgentName.Sovereign) activity = Math.max(activity, 0.7);
         if(dominantAgentTone === AgentName.DeepSeek) activity = Math.max(activity, 0.5);
     }
     if (sephirahId === 'tiphareth' && lastRitualOutcome?.success && (lastRitualOutcome.alchemyResult?.energyLevel === 'potent' || lastRitualOutcome.alchemyResult?.energyLevel === 'overwhelming')) {
@@ -291,7 +291,7 @@ const TreeOfLifeVisualizer: React.FC<TreeOfLifeVisualizerProps> = ({
       }
       if ((sephirah.id === 'chokmah' || sephirah.id === 'binah') && dominantAgentTone) {
         if (dominantAgentTone === AgentName.Nevik) hue = (45 + Math.random()*10 - 5 + 360)%360;
-        else if (dominantAgentTone === AgentName.Gemini) hue = (180 + Math.random()*10 - 5 + 360)%360;
+        else if (dominantAgentTone === AgentName.Sovereign) hue = (180 + Math.random()*10 - 5 + 360)%360;
         else if (dominantAgentTone === AgentName.DeepSeek) hue = (260 + Math.random()*10 - 5 + 360)%360;
         saturation = Math.min(100, saturation + 10);
       }

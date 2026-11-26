@@ -3,7 +3,5 @@
   "description": "Local-first Tri-Sophian Codex & Seeker Cards platform uniting interactive TCG knowledge shards, modular simulations, replaceable AI adapters, and optional MetaMask off-chain attestations.",
   "requestFramePermissions": [],
   "prompt": "",
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
+  "majorCapabilities": []
 }

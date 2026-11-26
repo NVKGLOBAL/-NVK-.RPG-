@@ -8,10 +8,10 @@
 `Remix: 🜂 NVKΔ.RPG 🜂` is not just another role-playing character creator—it is a **unified, high-fidelity trans-human portal** that bridges decentralized Web3 sovereign identity with state-of-the-art multimodal AI engines and sensory-immersive UI architectures. It is designed to be the ultimate sandbox where high-concept cosmic lore meets real-world cryptographic proof.
 
 ### Why should people use it?
-1. **True Convergence of AI & Web3**: Instead of separate tech silos, the app fuses MetaMask browser wallet states (`window.ethereum`) with Gemini multimodal generators. Connecting your wallet instantly synchronizes cryptographic data to your character card, letting you sign occult, cybernetic agreements (`personal_sign`) with absolute security, and minting certified character "Soul Seals" locally to unlock real visual game badges.
-2. **Instant Gratification via "⚡ Instant Manifest"**: Traditional onboarding takes time. With our Instant Manifestation feature, users can experience a 1-click randomized bypass that immediately kicks off a synchronous dual-API loop—crafting unique custom-woven backgrounds via Gemini text generation AND rendering custom, high-fidelity RPG portraits using generative AI imaging in seconds.
+1. **True Convergence of AI & Web3**: Instead of separate tech silos, the app fuses MetaMask browser wallet states (`window.ethereum`) with the local Sovereign Procedural Engine and zero-key open inference. Connecting your wallet instantly synchronizes cryptographic data to your character card, letting you sign occult, cybernetic agreements (`personal_sign`) with absolute security, and minting certified character "Soul Seals" locally to unlock real visual game badges.
+2. **Instant Gratification via "⚡ Instant Manifest"**: Traditional onboarding takes time. With our Instant Manifestation feature, users can experience a 1-click randomized bypass that immediately kicks off a synchronous dual-API loop—crafting unique custom-woven backgrounds via local procedural text generation AND rendering custom RPG portraits using local procedural SVG art in seconds.
 3. **Immersive Sensory Architecture**: Leveraging a physics-based coordinate-responsive Canvas (the Mutator Loom) and an algorithmic, entropy-tracked sound engine, every click, hover, and level-up resonates with customizable acoustic frequencies and dynamic visual feedback.
-4. **Resilient Multimodal Design**: The backend architecture implements a robust model-mapping proxy that automatically converts legacy/deprecated Gemini parameters into the latest, high-performance engines (`gemini-3.5-flash`), guaranteeing a seamless, zero-crash, and highly responsive user experience.
+4. **Resilient Multimodal Design**: The backend architecture implements a robust model-mapping proxy that automatically routes legacy/deprecated model ids (including old Gemini ids) to the offline Sovereign Procedural Engine, guaranteeing a seamless, zero-crash, and highly responsive user experience with no API keys.
 
 ---
 
@@ -68,7 +68,7 @@ Before embarking into the Codex, a user constructs a customized "Seeker" through
 * **Frame Architecture (Body Layout)**: Over fifty (50) creative, bespoke somatic categories spanning organic, cybernetic, gaseous, and energetic states (e.g., *Slender*, *Gossamer Thread*, *Cybernetic Chassis*, *Eldritch Weaver*, *Celestial Resonance*).
 * **Seeker Class & Spiritual Lineage**: Choices ranging from cybernetic Chronomancers to heavy Juggernauts.
 * **Visual Synthesis Filters**: Immersive, multi-era artistic render guidelines (over 50 distinct filters including *Synthwave Radiance*, *Glitched Corruption*, *Cyanotope Blueprint*, *Mosaics*, *Ukiyo-e*, and *Liminal Corridor*). These map directly to Generative prompts to steer the visual style of the custom vessel cards.
-* **⚡ Instant Manifestation Bypass**: A low-friction bypass that instantly generates a fully randomized, lore-aligned Seeker profile. This bypass triggers the full **Gemini AI weaving sequence** (both unique Bio synthesis and dynamic RPG character image generation) instantly, with fully randomized inputs, allowing users to dive straight into active gameplay loops with a unique custom vessel card.
+* **⚡ Instant Manifestation Bypass**: A low-friction bypass that instantly generates a fully randomized, lore-aligned Seeker profile. This bypass triggers the full **Sovereign AI weaving sequence** (both unique Bio synthesis and dynamic RPG character image generation) instantly, with fully randomized inputs, allowing users to dive straight into active gameplay loops with a unique custom vessel card.
 
 #### 3.2 Dynamic Artifact Rendering Engine
 Dynamic creation and rendering of profile collector cards featuring:
@@ -102,16 +102,17 @@ An immersive, decentralized binding module integrated directly in the user heade
 * **Zero Client-Side Keys**: Universal proxy logic runs through the backend structure; local environments leverage automated fallback routing to keep secret development tokens fully obfuscated.
 * **Local Space Persistence**: Built with high-speed indexes powered by `Dexie.js` (IndexedDB) to maintain local character sheets, chat logs, items, and canvas configurations between sessions.
 
-#### 4.2 Automated Gemini Model Mapping Matrix
-Due to frequent platform transformations and deprecated entity ranges, the application integrates an auto-mapping proxy layer in `GeminiIntegrationContext.tsx`. This intercepts older requests and updates parameters in real-time to avoid a `404 NOT_FOUND` error:
+#### 4.2 Automated Legacy Model Mapping Matrix
+Due to frequent platform transformations and deprecated entity ranges, the application integrates an auto-mapping proxy layer in `SovereignAIContext.tsx` / `lib/ai/providerAdapter.ts`. This intercepts older requests and routes them to the local engine in real-time to avoid a `404 NOT_FOUND` error:
 
 | Deprecated Entity Reference | Clean Modern Map | Functional Outcome |
 | :--- | :--- | :--- |
-| `gemini-1.5-flash` | `gemini-3.5-flash` | High-frequency swift interactions |
-| `gemini-1.5-pro` | `gemini-3.1-pro-preview` | Complex multi-stage alchemical reasoning |
-| `gemini-2.0-flash-exp` | `gemini-3.5-flash` | Experimental performance safeguards |
-| `gemini-1.0-pro` | `gemini-3.5-flash` | Safe fallback execution |
-| `gemini-3-flash-preview` | `gemini-3.5-flash` | Ultra-modern preview alignment |
+| `gemini-1.5-flash` | `nvk-local-neural` | High-frequency swift interactions (offline) |
+| `gemini-1.5-pro` | `nvk-local-neural` | Complex multi-stage alchemical reasoning (offline) |
+| `gemini-2.0-flash-exp` | `nvk-local-neural` | Experimental performance safeguards (offline) |
+| `gemini-1.0-pro` | `nvk-local-neural` | Safe fallback execution (offline) |
+| `gemini-3-flash-preview` | `nvk-local-neural` | Ultra-modern preview alignment (offline) |
+| `gemini-2.5-flash-image` | `nvk-local-neural` | Image synthesis → local procedural SVG artwork (offline) |
 
 ---
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import { GeminiProvider } from './context/GeminiIntegrationContext';
+import { SovereignAIProvider } from './context/SovereignAIContext';
 import { NarrationProvider } from './context/NarrationContext';
 import { NotificationProvider } from './context/NotificationContext';
 import { DialogHost } from './components/ui/DialogHost';
@@ -17,12 +17,12 @@ root.render(
   <React.StrictMode>
     <ErrorBoundary fallbackTitle="NVK Codex Kernel Recovery">
       <NotificationProvider>
-        <GeminiProvider>
+        <SovereignAIProvider>
           <NarrationProvider>
             <App />
             <DialogHost />
           </NarrationProvider>
-        </GeminiProvider>
+        </SovereignAIProvider>
       </NotificationProvider>
     </ErrorBoundary>
   </React.StrictMode>

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { useGemini } from '../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../context/SovereignAIContext';
 import { AgentName, HistoricalEventType } from '../types';
 import type { DreambloomInterpretation, HistoricalDreambloomAnalysisEventData, EchoMessage } from '../types';
 import { AGENT_PROFILES, DREAMBLOOM_THEMATIC_SEEDS } from '../constants';
@@ -12,7 +12,7 @@ export const useDreambloomSystem = (addEchoMessage: AddEchoMessageFn) => {
   const [isLoading, setIsLoading] = useState(false);
   const [pulseNumber, setPulseNumber] = useState(0);
   
-  const { invokeGemini, generateImage, isGenerating: isGeminiBusy } = useGemini();
+  const { invokeAI, generateImage, isGenerating: isAIBusy } = useSovereignAI();
   const autoLoopRef = useRef<number | undefined>(undefined);
 
   const parseInterpretationText = (text: string, currentPulse: number): Partial<DreambloomInterpretation> => {
@@ -42,7 +42,7 @@ export const useDreambloomSystem = (addEchoMessage: AddEchoMessageFn) => {
   };
 
   const conjurePulse = useCallback(async (customSeed?: string) => {
-    if (isLoading || isGeminiBusy) return;
+    if (isLoading || isAIBusy) return;
     
     setIsLoading(true);
     const currentPulse = pulseNumber + 1;
@@ -73,7 +73,7 @@ export const useDreambloomSystem = (addEchoMessage: AddEchoMessageFn) => {
       FUNCTION: [1 sentence]
       PLACEMENT: [Mythic location]`;
       
-      const interpretationText = await invokeGemini(textPrompt, "You are the Dreambloom Oracle.");
+      const interpretationText = await invokeAI(textPrompt, "You are the Dreambloom Oracle.");
       if (!interpretationText) throw new Error("Text interpretation failed.");
 
       const parsedDetails = parseInterpretationText(interpretationText, currentPulse);
@@ -112,7 +112,7 @@ export const useDreambloomSystem = (addEchoMessage: AddEchoMessageFn) => {
     } finally {
       setIsLoading(false);
     }
-  }, [isLoading, isGeminiBusy, pulseNumber, generateImage, invokeGemini, addEchoMessage]);
+  }, [isLoading, isAIBusy, pulseNumber, generateImage, invokeAI, addEchoMessage]);
 
   const toggleAuto = useCallback(() => {
     setIsAutoActive(prev => {

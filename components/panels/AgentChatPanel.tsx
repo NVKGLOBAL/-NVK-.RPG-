@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AgentNode } from '../../types';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 
 interface AgentChatPanelProps {
   agent: AgentNode;
@@ -10,7 +10,7 @@ interface AgentChatPanelProps {
 const AgentChatPanel: React.FC<AgentChatPanelProps> = ({ agent, onClose }) => {
   const [messages, setMessages] = useState<{ sender: string; text: string; isUser: boolean }[]>([]);
   const [input, setInput] = useState('');
-  const { invokeGemini, isGenerating } = useGemini();
+  const { invokeAI, isGenerating } = useSovereignAI();
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ Respond in character. Keep responses concise and flavorful, reflecting your fact
     const prompt = `Seeker says: "${userMessage}"\n\nRespond as ${agent.name}:`;
 
     try {
-      const response = await invokeGemini(prompt, systemPrompt);
+      const response = await invokeAI(prompt, systemPrompt);
       setMessages(prev => [...prev, { sender: agent.name, text: response || '*silence*', isUser: false }]);
     } catch (error) {
       console.error("Agent communication error:", error);

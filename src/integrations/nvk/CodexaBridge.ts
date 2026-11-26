@@ -1,4 +1,3 @@
-import { GoogleGenAI } from '@google/genai';
 import type {
   CodexaInferenceRequest,
   CodexaInferenceResponse,
@@ -38,20 +37,18 @@ export class CodexaBridge {
 
   private getRuntimeConfig() {
     if (typeof window === 'undefined') {
-      return { selectedModel: 'pollinations-openai', customModel: '', apiKey: null, ollamaUrl: 'http://localhost:11434' };
+      return { selectedModel: 'nvk-local-neural', customModel: '', ollamaUrl: 'http://localhost:11434' };
     }
     return {
-      selectedModel: localStorage.getItem('selected_ai_model') || 'pollinations-openai',
+      selectedModel: localStorage.getItem('selected_ai_model') || 'nvk-local-neural',
       customModel: localStorage.getItem('custom_ai_model') || '',
-      apiKey: localStorage.getItem('custom_ai_api_key') || null,
       ollamaUrl: localStorage.getItem('ollama_base_url') || 'http://localhost:11434',
     };
   }
 
   public getCapabilityReport(): CodexaCapabilityReport {
-    const { selectedModel, customModel, apiKey } = this.getRuntimeConfig();
+    const { selectedModel, customModel } = this.getRuntimeConfig();
     const resolved = resolveAdapterModelId(selectedModel, customModel);
-    const isGemini = resolved.startsWith('gemini-') || resolved.startsWith('imagen-');
     const isLocal = resolved === 'nvk-local-neural';
 
     return {
@@ -61,25 +58,25 @@ export class CodexaBridge {
       supportsEmbedding: true,
       supportsSpeech: true,
       supportsTools: true,
-      activeProvider: isGemini && apiKey ? 'gemini' : isLocal ? 'local-procedural' : resolved.includes('ollama') ? 'ollama' : 'pollinations',
+      activeProvider: isLocal ? 'local-procedural' : resolved.includes('ollama') ? 'ollama' : 'pollinations',
       activeModel: resolved,
       isOfflineFallback: isLocal,
     };
   }
 
   public async infer(req: CodexaInferenceRequest): Promise<CodexaInferenceResponse> {
-    const { selectedModel, customModel, apiKey, ollamaUrl } = this.getRuntimeConfig();
+    const { selectedModel, customModel, ollamaUrl } = this.getRuntimeConfig();
     const modelId = req.preferredModelId || resolveAdapterModelId(selectedModel, customModel);
 
     const startTime = Date.now();
 
     if (req.capability === 'image') {
-      const url = await invokeAdapterImage({ prompt: req.prompt, model: modelId, apiKey });
+      const url = await invokeAdapterImage({ prompt: req.prompt });
       const receipt: CodexaExecutionReceipt = {
         requestId: req.requestId,
-        providerUsed: apiKey ? 'gemini-imagen' : 'pollinations-flux',
+        providerUsed: 'pollinations-flux',
         modelUsed: modelId,
-        fallbackUsed: !apiKey,
+        fallbackUsed: false,
         offline: false,
         timestamp: Date.now(),
       };
@@ -87,13 +84,13 @@ export class CodexaBridge {
     }
 
     if (req.capability === 'embedding') {
-      const vec = await invokeAdapterEmbedding(req.prompt, apiKey);
+      const vec = await invokeAdapterEmbedding(req.prompt);
       const receipt: CodexaExecutionReceipt = {
         requestId: req.requestId,
-        providerUsed: apiKey ? 'gemini-embedding' : 'local-vector',
-        modelUsed: 'gemini-embedding-001',
-        fallbackUsed: !apiKey,
-        offline: !apiKey,
+        providerUsed: 'local-vector',
+        modelUsed: 'local-vector-embedding',
+        fallbackUsed: false,
+        offline: true,
         timestamp: Date.now(),
       };
       return { receipt, embedding: vec };
@@ -118,7 +115,6 @@ export class CodexaBridge {
       systemInstruction: req.systemInstruction,
       responseMimeType: req.responseFormat,
       modelId,
-      apiKey,
       ollamaBaseUrl: ollamaUrl,
     });
 
@@ -138,36 +134,10 @@ export class CodexaBridge {
   }
 
   public async *inferStream(req: CodexaInferenceRequest): AsyncGenerator<string, void, unknown> {
-    const { selectedModel, customModel, apiKey } = this.getRuntimeConfig();
+    const { selectedModel, customModel } = this.getRuntimeConfig();
     const modelId = req.preferredModelId || resolveAdapterModelId(selectedModel, customModel);
 
-    // If using real Gemini SDK on server or client with key, stream via @google/genai
-    if (apiKey && (modelId.startsWith('gemini-') || modelId.startsWith('imagen-'))) {
-      try {
-        const ai = new GoogleGenAI({
-          apiKey,
-          httpOptions: { headers: { 'User-Agent': 'aistudio-build' } },
-        });
-        const responseStream = await ai.models.generateContentStream({
-          model: modelId,
-          contents: req.prompt,
-          config: {
-            ...(req.systemInstruction && { systemInstruction: req.systemInstruction }),
-            ...(req.responseFormat && { responseMimeType: req.responseFormat }),
-          },
-        });
-        for await (const chunk of responseStream) {
-          if (chunk.text) {
-            yield chunk.text;
-          }
-        }
-        return;
-      } catch (err) {
-        console.warn('CodexaBridge: Gemini stream fallback to text invoke:', err);
-      }
-    }
-
-    // Fallback streaming simulation chunking for non-Gemini providers
+    // Stream the local/adapter result in chunks for all providers
     const res = await this.infer(req);
     const text = res.outputText || '';
     const chunkSize = 16;

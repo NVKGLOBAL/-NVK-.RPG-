@@ -22,7 +22,7 @@ import {
   AVATAR_RACES
 } from '../../constants';
 import { Button } from '../ui/Button';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 import html2canvas from 'html2canvas';
 
 // --- Random Name Generator ---
@@ -189,7 +189,7 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
   const [faction, setFaction] = useState(existingProfile?.faction || '');
   const [newTraitInput, setNewTraitInput] = useState('');
   const [editableTraits, setEditableTraits] = useState<string[]>(existingProfile?.selfTraits || []);
-  const { generateImage, invokeGemini } = useGemini();
+  const { generateImage, invokeAI } = useSovereignAI();
 
   // Update local state if existingProfile changes externally
   useEffect(() => {
@@ -239,7 +239,7 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
       IMPORTANT: No text, no words, no paragraphs in image. Purely visual portrait.`;
       
       try {
-          const url = await generateImage(prompt, 'gemini-2.5-flash-image');
+          const url = await generateImage(prompt);
           if (url) {
               setAvatarUrl(url);
               addEchoMessage(AgentName.SeekerProfileWeaverAgent, "Avatar manifested with bi-tonal resonance.", "text-emerald-300");
@@ -278,7 +278,7 @@ const SeekerProfileWeaverPanel: React.FC<SeekerProfileWeaverPanelProps> = ({
     
     try {
         const bioPrompt = `Write a 2-sentence epic, mystical backstory for a ${gender} ${race} ${seekerClass} named ${name} with ${alignment} alignment and a rare ${aura}/${secondaryAura} resonance. Tone: Mysterious.`;
-        const generatedBio = await invokeGemini(bioPrompt, "You are a master storyteller for a cosmic RPG.");
+        const generatedBio = await invokeAI(bioPrompt, "You are a master storyteller for a cosmic RPG.");
         if (generatedBio) {
             bio = generatedBio;
             addEchoMessage(AgentName.SeekerProfileWeaverAgent, "Biography inscribed.", "text-emerald-300");

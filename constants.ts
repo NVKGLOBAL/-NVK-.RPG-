@@ -36,14 +36,14 @@ export const THEME_DATA = [
   { id: AppTheme.SOLAR, name: "Solar Axiom", icon: "ri-sun-line", color: "text-amber-400", bgClass: "bg-stone-950" },
 ];
 
-export const GEMINI_ENTROPY_RESPONSE_FRAGMENTS = [
+export const SOVEREIGN_ENTROPY_RESPONSE_FRAGMENTS = [
   "The pattern dissolves...",
   "Order frays at the edges...",
   "Chaos whispers...",
 ];
 
 export const AGENT_CONSTELLATION_COLORS: Record<string, string> = {
-  [AgentName.Gemini]: 'text-cyan-300',
+  [AgentName.Sovereign]: 'text-cyan-300',
   [AgentName.DeepSeek]: 'text-rose-400',
   [AgentName.Nevik]: 'text-amber-300',
   [AgentName.System]: 'text-slate-400',
@@ -397,7 +397,7 @@ export const AGENT_PROFILES: Record<AgentName, AgentProfile> = (Object.values(Ag
 // Overrides for key agents
 AGENT_PROFILES[AgentName.System].colorClass = 'text-slate-400';
 AGENT_PROFILES[AgentName.RPGNexusAgent].colorClass = 'text-indigo-400';
-AGENT_PROFILES[AgentName.Gemini].colorClass = 'text-cyan-300';
+AGENT_PROFILES[AgentName.Sovereign].colorClass = 'text-cyan-300';
 AGENT_PROFILES[AgentName.DeepSeek].colorClass = 'text-rose-400';
 AGENT_PROFILES[AgentName.Nevik].colorClass = 'text-amber-300';
 AGENT_PROFILES[AgentName.PrimeConductor].colorClass = 'text-indigo-500';

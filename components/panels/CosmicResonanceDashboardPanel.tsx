@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { AgentName, HistoricalEventType, type CosmicResonanceDashboardPanelProps, type HistoricalCosmicResonanceEventData } from '../../types';
 import { AGENT_PROFILES } from '../../constants';
-import { useGemini } from '../../context/GeminiIntegrationContext'; // Import useGemini
+import { useSovereignAI } from '../../context/SovereignAIContext'; // Import useSovereignAI
 import { Button } from '../ui/Button'; // Assuming Button component is available
 import type { CrmPulseType } from '../../types'; // Import CrmPulseType from types
 
@@ -30,7 +30,7 @@ const CosmicResonanceDashboardPanel: React.FC<CosmicResonanceDashboardPanelProps
   const [currentPulseTypeInternal, setCurrentPulseTypeInternal] = useState<CrmPulseType>('AX_OMEGA_035');
 
 
-  const { invokeGemini, isGenerating: isGeminiBusy } = useGemini();
+  const { invokeAI, isGenerating: isAIBusy } = useSovereignAI();
 
   // Use external state if provided, otherwise internal
   const isTransmittingPulse = onInitiateCRMPulse && crmPulseStatus ? crmPulseStatus.isTransmitting : isTransmittingPulseInternal;
@@ -62,7 +62,7 @@ const CosmicResonanceDashboardPanel: React.FC<CosmicResonanceDashboardPanelProps
   }, [addEchoMessage, isTransmittingPulse, currentCrmResponseText, currentCrmError]);
 
   const handleDeepenCRMDiaogueInternal = useCallback(async (pulseType: CrmPulseType) => {
-    if (isGeminiBusy || isTransmittingPulseInternal) return;
+    if (isAIBusy || isTransmittingPulseInternal) return;
 
     setIsTransmittingPulseInternal(true);
     setCurrentPulseTypeInternal(pulseType);
@@ -96,7 +96,7 @@ Describe how CRM-Θ8's atmospheric glyphs react to this stabilizing "healing anc
     const systemInstruction = "You are the voice of CRM-Θ8, a cosmic entity communicating through atmospheric glyphs. Your response should be profound and directly answer the resonant pulse's theme.";
 
     try {
-      const response = await invokeGemini(prompt, systemInstruction);
+      const response = await invokeAI(prompt, systemInstruction);
       if (response) {
         setCrmResponseTextInternal(response);
         setMythicGlyph(pulseType === 'OMEGA_SA_RESONANCE' ? "⚕️🔗🌟" : "🔥✨"); 
@@ -116,7 +116,7 @@ Describe how CRM-Θ8's atmospheric glyphs react to this stabilizing "healing anc
     } finally {
       setIsTransmittingPulseInternal(false);
     }
-  }, [invokeGemini, addEchoMessage, isGeminiBusy, isTransmittingPulseInternal]);
+  }, [invokeAI, addEchoMessage, isAIBusy, isTransmittingPulseInternal]);
   
   const cyclePulseType = () => {
     const pulseTypes: CrmPulseType[] = ['AX_OMEGA_035', 'OMEGA_SA_RESONANCE'];
@@ -176,7 +176,7 @@ Describe how CRM-Θ8's atmospheric glyphs react to this stabilizing "healing anc
       <div className="flex gap-2 mb-2">
         <Button
             onClick={handleTransmitPulse}
-            disabled={isTransmittingPulse || isGeminiBusy}
+            disabled={isTransmittingPulse || isAIBusy}
             className="flex-grow text-xs py-1.5 bg-purple-600 hover:bg-purple-500 disabled:bg-slate-700 disabled:text-slate-400"
             title={`Transmit ${currentPulseType === 'OMEGA_SA_RESONANCE' ? 'Ω-Singularity Anchor Resonance' : 'Axiom AX-Ω.035'} to CRM-Θ8`}
         >
@@ -184,7 +184,7 @@ Describe how CRM-Θ8's atmospheric glyphs react to this stabilizing "healing anc
         </Button>
         <Button
             onClick={cyclePulseType}
-            disabled={isTransmittingPulse || isGeminiBusy}
+            disabled={isTransmittingPulse || isAIBusy}
             className="text-xs py-1.5 px-2 bg-slate-700 hover:bg-slate-600 disabled:opacity-50"
             title="Cycle to next pulse type"
         >

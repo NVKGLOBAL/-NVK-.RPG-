@@ -20,8 +20,8 @@ interface HeaderProps {
   onAmplifyVoices: () => void;
   onSeedDream: () => void;
   isAutoEchoPaused: boolean;
-  // Gemini Invocation
-  onInvokeGeminiOracle: () => void;
+  // Oracle Invocation
+  onInvokeOracleSanctum: () => void;
   onContextualOracleQuery: () => void; 
   // Ashfall Toggle
   onToggleAshfall: () => void;
@@ -46,7 +46,7 @@ interface HeaderProps {
   isNarrationEnabled?: boolean;
   onToggleNarration?: () => void;
   onExtractSigil: () => void;
-  // Gemini Model Selection
+  // AI Model Selection
   selectedModelId: string;
   onSetModelId: (id: string) => void;
   availableModels: { id: string; name: string; description: string }[];
@@ -87,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
   onAmplifyVoices,
   onSeedDream,
   isAutoEchoPaused,
-  onInvokeGeminiOracle,
+  onInvokeOracleSanctum,
   onContextualOracleQuery,
   onToggleAshfall,
   showAshfall,

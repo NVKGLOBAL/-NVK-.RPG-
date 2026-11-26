@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '../ui/Button';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 import { SeekerProfile, SeekerAvatarType, SeekerClass, SeekerGender, SeekerBodyType, SeekerEnergyAlignment, SeekerAuraColor, SeekerVisualFilter } from '../../types';
 import { 
   AVATAR_RACES, 
@@ -153,7 +153,7 @@ export const OnboardingFunnel: React.FC<OnboardingFunnelProps> = ({ onComplete, 
   const [isGeneratingIntent, setIsGeneratingIntent] = useState(false);
   
   const [generatedProfile, setGeneratedProfile] = useState<SeekerProfile | null>(null);
-  const { invokeGemini, generateImage } = useGemini();
+  const { invokeAI, generateImage } = useSovereignAI();
   const { notify } = useNotifications();
 
   const activeWeapon = useMemo(() => STARTER_WEAPONS.find(w => w.id === weaponId) || STARTER_WEAPONS[0], [weaponId]);
@@ -254,7 +254,7 @@ export const OnboardingFunnel: React.FC<OnboardingFunnelProps> = ({ onComplete, 
     Style: Cryptic, poetic, mystical. No introduction, just the intent text.`;
 
     try {
-      const response = await invokeGemini(prompt, "You are the Oracle, generator of sacred destinies.");
+      const response = await invokeAI(prompt, "You are the Oracle, generator of sacred destinies.");
       if (response) setIntent(response.trim().replace(/^"|"$/g, ''));
     } catch (e) {
       console.warn("Intent synthesis failed.");
@@ -359,7 +359,7 @@ export const OnboardingFunnel: React.FC<OnboardingFunnelProps> = ({ onComplete, 
     try {
         console.log("Synthesizing bio...");
         const bioPrompt = `Synthesize a unique bio for ${finalName} (${finalRace} ${finalClass}). Intention: "${intent || 'Unknown'}". 2 sentences. Return JSON: {"bio": "..."}`;
-        const response = await invokeGemini(bioPrompt, "Output JSON only.", "application/json");
+        const response = await invokeAI(bioPrompt, "Output JSON only.", "application/json");
         
         let bio = "A Seeker entering the Codex.";
         try {
@@ -382,7 +382,7 @@ export const OnboardingFunnel: React.FC<OnboardingFunnelProps> = ({ onComplete, 
         STYLE: ${finalVisualFilter} aesthetic rendering, high detail, no text in image.`;
         
         // Use a more modern model if available or stick to the current one
-        const avatarUrlResult = await generateImage(imagePrompt, 'gemini-2.5-flash-image');
+        const avatarUrlResult = await generateImage(imagePrompt);
         
         clearTimeout(timeoutId);
         const auraEnum = SEEKER_AURA_OPTIONS.find(o => o.hex.toLowerCase() === finalAura.toLowerCase())?.id as SeekerAuraColor || SeekerAuraColor.Prismatic;

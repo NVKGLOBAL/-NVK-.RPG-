@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto';
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
-  normalizeModelId,
+  resolveAdapterModelId,
   invokeAdapterText,
   generateProceduralSvgArtwork,
 } from '../lib/ai/providerAdapter';
@@ -12,11 +12,13 @@ describe('NVK Replaceable AI Adapter & SovereignKernel', () => {
     vi.restoreAllMocks();
   });
 
-  it('maps deprecated gemini-3 aliases to current stable 2.5 equivalents', () => {
-    expect(normalizeModelId('gemini-3-pro-preview')).toBe('gemini-2.5-pro');
-    expect(normalizeModelId('gemini-3.1-pro-preview')).toBe('gemini-2.5-pro');
-    expect(normalizeModelId('gemini-3-flash-preview')).toBe('gemini-2.5-flash');
-    expect(normalizeModelId('pollinations-openai')).toBe('pollinations-openai');
+  it('maps legacy gemini/imagen model ids to the local sovereign engine (no Gemini)', () => {
+    expect(resolveAdapterModelId('nvk-local-neural', '', 'gemini-3-pro-preview')).toBe('nvk-local-neural');
+    expect(resolveAdapterModelId('nvk-local-neural', '', 'gemini-3.1-pro-preview')).toBe('nvk-local-neural');
+    expect(resolveAdapterModelId('nvk-local-neural', '', 'gemini-2.5-flash-image')).toBe('nvk-local-neural');
+    expect(resolveAdapterModelId('nvk-local-neural', '', 'imagen-4.0-generate-001')).toBe('nvk-local-neural');
+    expect(resolveAdapterModelId('pollinations-openai', '')).toBe('pollinations-openai');
+    expect(resolveAdapterModelId('gemini-2.5-flash', '')).toBe('nvk-local-neural');
   });
 
   it('executes deterministic procedural reasoning offline with nvk-local-neural', async () => {

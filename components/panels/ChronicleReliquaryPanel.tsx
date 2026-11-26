@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ChronicleReliquaryPanelProps, CodexArtifact } from '../../types';
 import { AgentName, ArtifactRarity, ArtifactType } from '../../types';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 
 const RARITY_COLORS: Record<ArtifactRarity, string> = {
   [ArtifactRarity.Common]: 'border-slate-600 text-slate-400 bg-slate-800/50',
@@ -23,7 +23,7 @@ const ChronicleReliquaryPanel: React.FC<ChronicleReliquaryPanelProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredArtifacts, setFilteredArtifacts] = useState<CodexArtifact[]>(artifacts);
   const [isSearching, setIsSearching] = useState(false);
-  const { semanticSearch, generateEmbedding } = useGemini();
+  const { semanticSearch, generateEmbedding } = useSovereignAI();
 
   useEffect(() => {
     setFilteredArtifacts(artifacts);

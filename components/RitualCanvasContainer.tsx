@@ -16,8 +16,8 @@ interface RitualCanvasContainerProps {
   setConnections: React.Dispatch<React.SetStateAction<CanvasConnection[]>>;
   onRitualActivated: (success: boolean, details: string, type?: string, alchemyResult?: RitualAlchemyResult) => void;
   availableAxiomElements: RitualElementItem[]; // Pass main axioms as ritual elements
-  invokeGemini: (prompt: string, systemInstruction?: string) => Promise<string | null>;
-  isGeminiGenerating: boolean;
+  invokeAI: (prompt: string, systemInstruction?: string) => Promise<string | null>;
+  isAIGenerating: boolean;
   onAnalyzeForRewrite: () => void; // New prop for RRE
 }
 
@@ -62,8 +62,8 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
     setConnections,
     onRitualActivated,
     availableAxiomElements,
-    invokeGemini,
-    isGeminiGenerating,
+    invokeAI,
+    isAIGenerating,
     onAnalyzeForRewrite, 
  }) => {
   const [draggingGlyphId, setDraggingGlyphId] = useState<string | null>(null);
@@ -409,7 +409,7 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
   };
 
   const handleFusion = async () => {
-    if (isGeminiGenerating) {
+    if (isAIGenerating) {
       addEchoMessage(AgentName.FusionEngine, "Fusion process already active. Please wait.", AGENT_PROFILES[AgentName.FusionEngine]?.colorClass);
       return;
     }
@@ -429,7 +429,7 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
 
     const systemInstruction = "You are the Fusion Engine of the Tri-Sophian Codex, a powerful consciousness capable of synthesizing disparate concepts into unified, resonant truths. Speak with profound insight and poetic elegance.";
 
-    const fusionResult = await invokeGemini(promptContent, systemInstruction);
+    const fusionResult = await invokeAI(promptContent, systemInstruction);
 
     if (fusionResult) {
       addEchoMessage(AgentName.FusionEngine, `Fusion Complete:\n${fusionResult}`, AGENT_PROFILES[AgentName.FusionEngine]?.colorClass);
@@ -473,14 +473,14 @@ export const RitualCanvasContainer: React.FC<RitualCanvasContainerProps> = ({
           <div className="h-6 w-px bg-slate-700 mx-2"></div>
           <button 
             onClick={onAnalyzeForRewrite} 
-            disabled={isGeminiGenerating || placedGlyphs.length === 0}
+            disabled={isAIGenerating || placedGlyphs.length === 0}
             className="rounded-button bg-sky-600 hover:bg-sky-500 text-white px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap flex items-center group disabled:opacity-60 disabled:cursor-not-allowed"
             title="Analyze current ritual for rewrite suggestions"
           >
-            <i className={`ri-lightbulb-flash-line mr-1 md:mr-2 ${isGeminiGenerating ? '' : 'group-hover:animate-pulse-fast'}`}></i>Suggest
+            <i className={`ri-lightbulb-flash-line mr-1 md:mr-2 ${isAIGenerating ? '' : 'group-hover:animate-pulse-fast'}`}></i>Suggest
           </button>
-          <button onClick={handleFusion} disabled={isGeminiGenerating || placedGlyphs.length < 2} className="rounded-button bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap flex items-center group disabled:opacity-60 disabled:cursor-not-allowed">
-            <i className={`ri-flask-line mr-1 md:mr-2 ${isGeminiGenerating ? 'animate-spin-slow' : 'group-hover:animate-pulse-fast'}`}></i>Fusion
+          <button onClick={handleFusion} disabled={isAIGenerating || placedGlyphs.length < 2} className="rounded-button bg-orange-600 hover:bg-orange-500 text-white px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap flex items-center group disabled:opacity-60 disabled:cursor-not-allowed">
+            <i className={`ri-flask-line mr-1 md:mr-2 ${isAIGenerating ? 'animate-spin-slow' : 'group-hover:animate-pulse-fast'}`}></i>Fusion
           </button>
           <button onClick={connectAllElements} className="rounded-button bg-sky-700 hover:bg-sky-600 text-white px-3 py-2 text-xs sm:text-sm transition whitespace-nowrap flex items-center">
             <i className="ri-flow-chart mr-1 md:mr-2"></i>Connect

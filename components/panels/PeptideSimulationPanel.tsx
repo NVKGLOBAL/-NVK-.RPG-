@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import type { EchoMessage } from '../../types';
 import { AgentName, HistoricalEventType } from '../../types';
 import { AGENT_PROFILES } from '../../constants';
-import { useGemini } from '../../context/GeminiIntegrationContext';
+import { useSovereignAI } from '../../context/SovereignAIContext';
 import { Button } from '../ui/Button';
 // Fix: Added missing import for globalSoundEngine
 import { globalSoundEngine } from '../../lib/SoundEngine';
@@ -34,7 +34,7 @@ const PeptideSimulationPanel: React.FC<PeptideSimulationPanelProps> = ({ addEcho
   const [result, setResult] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [currentPhaseIndex, setCurrentPhaseIndex] = useState(-1);
-  const { invokeGemini } = useGemini();
+  const { invokeAI } = useSovereignAI();
   const logEndRef = useRef<HTMLDivElement>(null);
 
   const phases: StabilizationPhase[] = [
@@ -68,7 +68,7 @@ const PeptideSimulationPanel: React.FC<PeptideSimulationPanelProps> = ({ addEcho
         Focus on: 1. Dimensional Scabbing (Crystalline Bio-Membrane), 2. Harmonic Nullification (Scream to Hum), 3. Temporal stabilization at 1.00s/s.
         The readout should be from the perspective of a Tri-Sophian technician documenting a successful but permanent necrolysis zone. 1-2 paragraphs.`;
         
-        const text = await invokeGemini(prompt, "Speak as a technical lore scribe for the Tri-Sophian Codex.");
+        const text = await invokeAI(prompt, "Speak as a technical lore scribe for the Tri-Sophian Codex.");
         setResult(text);
         
         addEchoMessage(AgentName.System, "STABILIZATION COMPLETE: Sector 14 cauterized.", "text-emerald-400 font-bold");

@@ -60,7 +60,7 @@ import SeekerAuraDisplay from './components/panels/SeekerAuraDisplay';
 import { ChatNVKPanel } from './components/panels/ChatNVKPanel';
 import { CryptoNexusPanel } from './components/panels/CryptoNexusPanel';
 import { ErrorBoundary } from './components/core/ErrorBoundary';
-import { useGemini } from './context/GeminiIntegrationContext';
+import { useSovereignAI } from './context/SovereignAIContext';
 import { useNarration } from './context/NarrationContext';
 import { useNotifications } from './context/NotificationContext';
 import { SystemStateProvider } from './context/SystemContext';
@@ -257,12 +257,12 @@ const App: React.FC = () => {
   const seekerTraits = useMemo(() => activeProfile?.selfTraits || [], [activeProfile]);
 
   const {
-    invokeGemini,
-    isGenerating: isGeminiGenerating,
+    invokeAI,
+    isGenerating: isAIGenerating,
     selectedModelId,
     setSelectedModelId,
     availableModels,
-  } = useGemini();
+  } = useSovereignAI();
   const { speak, isNarrationEnabled, toggleNarration } = useNarration();
   const { notify, confirmDialog } = useNotifications();
 
@@ -496,7 +496,7 @@ const App: React.FC = () => {
     const glyphSummary = placedGlyphs.map((g) => `${g.label} (${g.type})`).join(', ') || 'Empty Canvas';
     const prompt = `Analyze this Ritual Canvas configuration (${placedGlyphs.length} glyphs: ${glyphSummary}; ${connections.length} connections; system entropy ${currentEntropy.toFixed(3)}) and propose 3 concrete structural rewrite improvements formatted with bullet points starting with * Suggestion: ... and Rationale: ...`;
     try {
-      const response = await invokeGemini(
+      const response = await invokeAI(
         prompt,
         'You are the Ritual Rewrite Oracle of NVK Tri-Sophian Codex. Provide concise, actionable structural glyph suggestions.'
       );
@@ -504,7 +504,7 @@ const App: React.FC = () => {
     } finally {
       setIsRewriteLoading(false);
     }
-  }, [placedGlyphs, connections.length, currentEntropy, invokeGemini]);
+  }, [placedGlyphs, connections.length, currentEntropy, invokeAI]);
 
   const handleWeaveGlyphs = useCallback(
     async (
@@ -520,7 +520,7 @@ const App: React.FC = () => {
       setMutationLoomState((prev) => ({ ...prev, isWeaving: true }));
       try {
         const prompt = `Fuse glyph "${g1.label}" (${g1.traits.join(', ')}) and "${g2.label}" (${g2.traits.join(', ')}) at entropy injection ${entropyInjection.toFixed(2)} with trait focus [${traitFocus.join(', ') || 'Balanced'}]. Reply with a concise mutated glyph title on the first line.`;
-        const result = await invokeGemini(prompt, 'You are the Mutation Loom Oracle.');
+        const result = await invokeAI(prompt, 'You are the Mutation Loom Oracle.');
         const label = (result?.split('\n')[0] || `${g1.label.split(' ')[0]}-${g2.label.split(' ')[0]} Hybrid`).slice(0, 48);
         const newNode: GlyphMutationNode = {
           id: `mut-${Date.now()}`,
@@ -539,7 +539,7 @@ const App: React.FC = () => {
         setMutationLoomState((prev) => ({ ...prev, isWeaving: false }));
       }
     },
-    [glyphMutationNodes, invokeGemini, activeProfile, addEchoMessage]
+    [glyphMutationNodes, invokeAI, activeProfile, addEchoMessage]
   );
 
   const handleConjureDreambloom = useCallback(
@@ -548,7 +548,7 @@ const App: React.FC = () => {
       try {
         const theme = seed?.trim() || 'Harmonic Recursion';
         const prompt = `Generate a poetic Dreambloom interpretation for thematic seed "${theme}". Give 1 concise symbolism sentence.`;
-        const symbolText = await invokeGemini(prompt, 'You are the Dreambloom Oracle.');
+        const symbolText = await invokeAI(prompt, 'You are the Dreambloom Oracle.');
         const nextNumber = dreambloomInterpretations.length + 1;
         const entry: DreambloomInterpretation = {
           id: `db-pulse-${Date.now()}`,
@@ -567,14 +567,14 @@ const App: React.FC = () => {
         setIsDreambloomLoading(false);
       }
     },
-    [dreambloomInterpretations.length, invokeGemini, addEchoMessage]
+    [dreambloomInterpretations.length, invokeAI, addEchoMessage]
   );
 
   const handleRevealBloomVariants = useCallback(
     async (node: GlyphMutationNode) => {
       setIsGeneratingBloomVariants(true);
       try {
-        await invokeGemini(
+        await invokeAI(
           `Describe 3 visual sigil bloom variants for glyph "${node.label}" (${node.traits.join(', ')}).`,
           'You are the Sigil Bloom Curator.'
         );
@@ -607,14 +607,14 @@ const App: React.FC = () => {
         setIsGeneratingBloomVariants(false);
       }
     },
-    [invokeGemini]
+    [invokeAI]
   );
 
   const handleLogDriftEvent = useCallback(
     (driftInterpretation: IDriftInterpretationDB) => {
       addEchoMessage(
-        AgentName.GeminiDriftNarrator,
-        `Drift Analysis logged: ${driftInterpretation.geminiReading.slice(0, 120)}`,
+        AgentName.SovereignDriftNarrator,
+        `Drift Analysis logged: ${driftInterpretation.oracleReading.slice(0, 120)}`,
         'text-lime-300'
       );
     },
@@ -751,7 +751,7 @@ const App: React.FC = () => {
             mutationLoomState={mutationLoomState}
             setMutationLoomState={setMutationLoomState}
             addEchoMessage={addEchoMessage}
-            isGeminiGenerating={isGeminiGenerating}
+            isAIGenerating={isAIGenerating}
           />
         );
       case 'glyph_composer':
@@ -839,9 +839,9 @@ const App: React.FC = () => {
             glyphDriftHistory={[]}
             glyphMutationNodes={glyphMutationNodes}
             currentRitualContext={`Mode ${codexModeId} // ${placedGlyphs.length} Glyphs`}
-            isGeminiGenerating={isGeminiGenerating}
+            isAIGenerating={isAIGenerating}
             addEchoMessage={addEchoMessage}
-            logGeminiNarrativeDriftEvent={handleLogDriftEvent}
+            logOracleNarrativeDriftEvent={handleLogDriftEvent}
           />
         );
       case 'harmonic_core':
@@ -902,7 +902,7 @@ const App: React.FC = () => {
             selectedBloomVariantId={selectedBloomVariantId}
             onSelectBloomVariant={setSelectedBloomVariantId}
             isGeneratingBloomVariants={isGeneratingBloomVariants}
-            isGeminiBusy={isGeminiGenerating}
+            isAIBusy={isAIGenerating}
           />
         );
       case 'agent_directory':
@@ -1035,7 +1035,7 @@ const App: React.FC = () => {
               onLaunchModule('dreambloom');
             }}
             isAutoEchoPaused={isAutoEchoPaused}
-            onInvokeGeminiOracle={() => setIsOracleSanctumOpen(true)}
+            onInvokeOracleSanctum={() => setIsOracleSanctumOpen(true)}
             onContextualOracleQuery={() => setIsOracleSanctumOpen(true)}
             onToggleAshfall={() => setShowAshfall((prev) => !prev)}
             showAshfall={showAshfall}
@@ -1199,8 +1199,8 @@ const App: React.FC = () => {
                     setConnections={setConnections}
                     onRitualActivated={handleRitualActivated}
                     availableAxiomElements={AXIOM_RITUAL_ELEMENTS}
-                    invokeGemini={invokeGemini}
-                    isGeminiGenerating={isGeminiGenerating}
+                    invokeAI={invokeAI}
+                    isAIGenerating={isAIGenerating}
                     onAnalyzeForRewrite={handleAnalyzeForRewrite}
                   />
                 </>
@@ -1229,7 +1229,7 @@ const App: React.FC = () => {
           <CodexFooterBar
             phase="Synthesis"
             mode={codexModeId}
-            status={isGeminiGenerating ? 'AI Synthesizer Active' : 'System Active'}
+            status={isAIGenerating ? 'AI Synthesizer Active' : 'System Active'}
             currentEntropy={effectiveSystemEntropy}
             currentCodexModeId={codexModeId}
             onApplyOmegaAnchor={() => setCurrentEntropy((e) => Math.max(0, e - 0.1))}
